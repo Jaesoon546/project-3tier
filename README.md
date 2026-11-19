@@ -16,9 +16,10 @@ school_sungjuk/
 │   ├── student.py
 │   └── user.py
 ├── service/
-│   └── grade.py            # Student 클래스 — 총점·평균·학점, 점수 검사
+│   ├── grade.py            # Student 클래스 — 총점·평균·학점, 점수 검사
+│   └── account.py          # 계정 발급 폼 검사
 ├── templates/              # 모두 base.html 상속
-├── static/js/              # form_check.js (폼 검사), search.js (AJAX 검색)
+├── static/js/              # form_check.js (폼 검사), search.js (AJAX 검색), user_form.js (계정 발급)
 └── sql/                    # schema → procedures → school_data → student_data → user_data 순서로 실행
 ```
 
@@ -45,7 +46,7 @@ python flaskserver.py      # http://127.0.0.1:5000
 
 | 아이디 | 역할 | 볼 수 있는 것 |
 |---|---|---|
-| admin | 관리자 | 학교 목록·등록, 모든 학교 성적표·통계·이력 (조회만) |
+| admin | 관리자 | 학교 목록·등록, 계정 발급·관리, 모든 학교 성적표·통계·이력 (조회만) |
 | teacher1 / teacher2 / teacher3 | 교사 | 자기 학교 성적표, 학생 등록·수정·삭제, 통계, 이력, 검색 |
 | student1 / student6 / student11 | 학생 | 내 성적 |
 
@@ -55,6 +56,9 @@ python flaskserver.py      # http://127.0.0.1:5000
 |---|---|---|---|
 | `/login`, `/logout` | GET·POST | 모두 | 로그인 |
 | `/school_list` | GET·POST | 관리자 | 학교 목록·등록 |
+| `/user_list` | GET | 관리자 | 계정 목록 + 계정 발급 폼 |
+| `/user_insert` | POST | 관리자 | 계정 발급 (교사·학생·관리자) |
+| `/user_reset`, `/user_delete` | POST | 관리자 | 비밀번호 초기화, 계정 삭제 |
 | `/sungjuk_call/<schoolcode>` | GET | 관리자·교사 | 학교별 성적표 (등수 순) |
 | `/sungjuk_insert` | GET·POST | 교사 | 학생 등록 |
 | `/sungjuk_update` | POST | 교사 | bunho만 → 수정 폼, mode=save → 저장 |
@@ -70,3 +74,13 @@ python flaskserver.py      # http://127.0.0.1:5000
 - 등수: 학교마다 달라서 `student_rank` 뷰가 `RANK()`로 계산 (MySQL 8.0 이상)
 - 프로시저 결과 코드: 1 = 성공, 2 = 대상 없음, -1 = 에러
 - 모든 POST 폼에 `csrf_token`, 계정 비밀번호는 해시로 저장
+
+## DB 변경 반영하기
+
+- `procedures.sql`은 `DROP PROCEDURE IF EXISTS` 후 다시 만드는 방식이라 **다시 실행해도 데이터가 지워지지 않습니다.** 프로시저가 추가·변경되면 이 파일만 다시 실행하세요.
+- `schema.sql`은 테이블을 지우고(DROP) 새로 만들므로 **다시 실행하면 데이터가 모두 사라집니다.** 구조 변경은 `ALTER TABLE`로 하세요.
+
+## 계정 발급
+
+관리자로 로그인 → **계정 관리**에서 역할·학교·(학생이면) 연결할 학생을 고르고 아이디·초기 비밀번호를 입력합니다.
+비밀번호는 서버에서 해시로 바꿔 저장하므로 `make_password.py`는 SQL로 직접 넣을 때만 필요합니다.

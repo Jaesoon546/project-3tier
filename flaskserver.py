@@ -9,6 +9,7 @@ from flask_wtf.csrf import CSRFProtect
 
 from dao import school, student, user
 from service.grade import student_from_form
+from service.account import account_from_form, check_password, ROLES
 
 app = Flask(__name__)
 # 세션 암호화 키 — 실제로는 환경변수로 넣으세요 (export SECRET_KEY=...)
@@ -91,6 +92,66 @@ def school_list():
             flash('학교가 등록되었습니다.' if result == 1 else '등록 실패 (학교코드 중복 등)')
         return redirect(url_for('school_list'))
     return render_template('school_list.html', object_list=school.getSchoolList())
+
+
+# ===================== 계정 발급 (관리자) =====================
+
+USER_RESULT_MESSAGE = {
+    1: '완료되었습니다.',
+    2: '학교 또는 학생 번호가 맞지 않습니다.',
+    3: '이미 계정이 있는 학생입니다.',
+    -1: '에러가 발생했습니다. (아이디 중복 등)',
+}
+
+
+@app.route('/user_list')
+@login_required('admin')
+def user_list():
+    return render_template('user_list.html', object_list=user.getUserList(),
+                           school_list=school.getSchoolList(), roles=ROLES, form={})
+
+
+@app.route('/user_insert', methods=['POST'])
+@login_required('admin')
+def user_insert():
+    account, error = account_from_form(request.form)
+    if error:
+        flash(error)
+        # 입력한 값은 다시 채워서 보여줌 (비밀번호 제외)
+        return render_template('user_list.html', object_list=user.getUserList(),
+                               school_list=school.getSchoolList(), roles=ROLES, form=request.form)
+    result = user.insertUser(**account)
+    if result == 1:
+        flash(f"{account['login_id']} 계정을 발급했습니다.")
+        return redirect(url_for('user_list'))
+    flash(USER_RESULT_MESSAGE.get(result, '알 수 없음'))
+    return render_template('user_list.html', object_list=user.getUserList(),
+                           school_list=school.getSchoolList(), roles=ROLES, form=request.form)
+
+
+@app.route('/user_delete', methods=['POST'])
+@login_required('admin')
+def user_delete():
+    user_id = request.form.get('id', type=int)
+    if user_id == session['user']['id']:
+        flash('지금 로그인한 계정은 삭제할 수 없습니다.')
+    else:
+        flash(USER_RESULT_MESSAGE.get(user.deleteUser(user_id), '알 수 없음'))
+    return redirect(url_for('user_list'))
+
+
+@app.route('/user_reset', methods=['POST'])
+@login_required('admin')
+def user_reset():
+    """비밀번호 초기화 — 관리자가 정한 새 비밀번호로 바꿈"""
+    new_password = request.form.get('password', '')
+    error = check_password(new_password)
+    if error:
+        flash(error)
+    else:
+        result = user.resetPassword(request.form.get('id', type=int), new_password)
+        flash('비밀번호를 바꿨습니다.' if result == 1 else USER_RESULT_MESSAGE.get(result, '알 수 없음'))
+    return redirect(url_for('user_list'))
 
 
 # ===================== 성적 (관리자·교사) =====================
