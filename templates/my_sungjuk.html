@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}내 성적{% endblock title %}
+{% block content %}
+<h3>내 성적</h3>
+{% if sungjuk %}
+<table class="table w-auto">
+    <tbody>
+        <tr><th>이름</th><td>{{ sungjuk.name }}</td></tr>
+        <tr><th>국어</th><td>{{ sungjuk.kor }}</td></tr>
+        <tr><th>영어</th><td>{{ sungjuk.eng }}</td></tr>
+        <tr><th>수학</th><td>{{ sungjuk.mat }}</td></tr>
+        <tr><th>총점</th><td>{{ sungjuk.total }}</td></tr>
+        <tr><th>평균</th><td>{{ sungjuk.average }}</td></tr>
+        <tr><th>학점</th><td>{{ sungjuk.grade }}</td></tr>
+        <tr><th>학교 등수</th><td>{{ sungjuk.ranks }}</td></tr>
+    </tbody>
+</table>
+{% else %}
+<p>성적 정보가 없습니다. 선생님께 문의하세요.</p>
+{% endif %}
+{% endblock content %}

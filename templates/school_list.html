@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}학교 목록{% endblock title %}
+{% block content %}
+<h3>학교 목록</h3>
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th>학교코드</th><th>학교명</th><th>주소</th><th>학생 수</th><th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for s in object_list %}
+        <tr>
+            <td>{{ s.schoolcode }}</td>
+            <td>{{ s.schoolname }}</td>
+            <td>{{ s.address }}</td>
+            <td>{{ s.studentcount }}</td>
+            <td>
+                <a class="btn btn-sm btn-outline-primary" href="{{ url_for('sungjuk_call', schoolcode=s.schoolcode) }}">성적표</a>
+                <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('stats', schoolcode=s.schoolcode) }}">통계</a>
+                <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('history', schoolcode=s.schoolcode) }}">이력</a>
+            </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5">등록된 학교가 없습니다.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h5 class="mt-4">학교 등록</h5>
+<form class="row g-2" action="{{ url_for('school_list') }}" method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="col-sm-3"><input class="form-control" name="schoolcode" placeholder="학교코드 (예: DJ00000003)" maxlength="10" required></div>
+    <div class="col-sm-3"><input class="form-control" name="schoolname" placeholder="학교명" required></div>
+    <div class="col-sm-4"><input class="form-control" name="address" placeholder="주소"></div>
+    <div class="col-sm-2"><button class="btn btn-primary w-100" type="submit">등록</button></div>
+</form>
+{% endblock content %}

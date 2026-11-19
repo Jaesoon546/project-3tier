@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}{{ school.schoolname }} 통계{% endblock title %}
+{% block content %}
+<h3>{{ school.schoolname }} 과목별 통계</h3>
+<table class="table">
+    <thead>
+        <tr><th>과목</th><th>합계</th><th>평균</th><th>최고</th><th>최저</th></tr>
+    </thead>
+    <tbody>
+        {% for row in object_list %}
+        <tr>
+            <td>{{ row.subject }}</td>
+            <td>{{ row.total if row.total is not none else '-' }}</td>
+            <td>{{ row.average if row.average is not none else '-' }}</td>
+            <td>{{ row.max_score if row.max_score is not none else '-' }}</td>
+            <td>{{ row.min_score if row.min_score is not none else '-' }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock content %}

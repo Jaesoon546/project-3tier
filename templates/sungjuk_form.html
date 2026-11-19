@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}{{ '성적 수정' if mode == 'update' else '학생 등록' }}{% endblock title %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-sm-8 col-lg-5">
+        <h3 class="mb-3">{{ '성적 수정' if mode == 'update' else '학생 등록' }}</h3>
+
+        <!-- 등록·수정 공용 폼: mode에 따라 보낼 주소가 바뀜 -->
+        <form name="sungjukForm" id="sungjukForm" method="post"
+              action="{{ url_for('sungjuk_update') if mode == 'update' else url_for('sungjuk_insert') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            {% if mode == 'update' %}
+            <input type="hidden" name="bunho" value="{{ sungjuk.bunho }}">
+            <input type="hidden" name="mode" value="save">
+            {% endif %}
+
+            <div class="mb-3">
+                <label for="name" class="form-label">이름</label>
+                <input type="text" class="form-control" id="name" name="name" value="{{ sungjuk.name or '' }}">
+            </div>
+            <div class="mb-3">
+                <label for="kor" class="form-label">국어</label>
+                <input type="number" class="form-control score" id="kor" name="kor" value="{{ sungjuk.kor if sungjuk.kor is not none else '' }}">
+            </div>
+            <div class="mb-3">
+                <label for="eng" class="form-label">영어</label>
+                <input type="number" class="form-control score" id="eng" name="eng" value="{{ sungjuk.eng if sungjuk.eng is not none else '' }}">
+            </div>
+            <div class="mb-3">
+                <label for="mat" class="form-label">수학</label>
+                <input type="number" class="form-control score" id="mat" name="mat" value="{{ sungjuk.mat if sungjuk.mat is not none else '' }}">
+            </div>
+            <div id="form_error" class="text-danger mb-2"></div>
+            <button type="submit" class="btn btn-primary">저장</button>
+            <a href="/" class="btn btn-secondary">취소</a>
+        </form>
+    </div>
+</div>
+{% endblock content %}
+
+{% block script %}
+<script src="{{ url_for('static', filename='js/form_check.js') }}"></script>
+{% endblock script %}
