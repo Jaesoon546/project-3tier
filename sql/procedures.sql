@@ -154,6 +154,78 @@ BEGIN
     WHERE login_id = p_login_id;
 END $$
 
+-- 계정 목록 (관리자 계정 관리 화면) — 비밀번호 해시는 보내지 않음
+DROP PROCEDURE IF EXISTS user_select_all $$
+CREATE PROCEDURE user_select_all()
+BEGIN
+    SELECT u.id, u.login_id, u.name, u.role, u.schoolcode, sc.schoolname, u.bunho
+    FROM user_data u
+    LEFT JOIN school_data sc ON sc.schoolcode = u.schoolcode
+    ORDER BY FIELD(u.role, 'admin', 'teacher', 'student'), sc.schoolname, u.login_id;
+END $$
+
+-- 계정 발급
+--   결과: 1 = 성공, 2 = 학교 또는 학생 번호가 맞지 않음, 3 = 이미 계정이 있는 학생, -1 = 에러(아이디 중복 등)
+DROP PROCEDURE IF EXISTS user_insert $$
+CREATE PROCEDURE user_insert(
+    IN p_login_id VARCHAR(30), IN p_password_hash VARCHAR(255), IN p_name VARCHAR(20),
+    IN p_role VARCHAR(10), IN p_schoolcode VARCHAR(10), IN p_bunho INT,
+    OUT p_result INT)
+proc: BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION SET p_result = -1;
+
+    -- 교사·학생은 존재하는 학교가 있어야 함
+    IF p_role IN ('teacher', 'student')
+       AND NOT EXISTS (SELECT 1 FROM school_data WHERE schoolcode = p_schoolcode) THEN
+        SET p_result = 2;
+        LEAVE proc;
+    END IF;
+
+    -- 학생은 그 학교의 학생 번호여야 하고, 계정은 한 명에 하나
+    IF p_role = 'student' THEN
+        IF NOT EXISTS (SELECT 1 FROM student_data WHERE bunho = p_bunho AND schoolcode = p_schoolcode) THEN
+            SET p_result = 2;
+            LEAVE proc;
+        END IF;
+        IF EXISTS (SELECT 1 FROM user_data WHERE bunho = p_bunho) THEN
+            SET p_result = 3;
+            LEAVE proc;
+        END IF;
+    END IF;
+
+    INSERT INTO user_data(login_id, password_hash, name, role, schoolcode, bunho)
+    VALUES (p_login_id, p_password_hash, p_name, p_role,
+            IF(p_role = 'admin', NULL, p_schoolcode),
+            IF(p_role = 'student', p_bunho, NULL));
+    SET p_result = 1;
+END $$
+
+-- 계정 삭제
+DROP PROCEDURE IF EXISTS user_delete $$
+CREATE PROCEDURE user_delete(IN p_id INT, OUT p_result INT)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION SET p_result = -1;
+    IF NOT EXISTS (SELECT 1 FROM user_data WHERE id = p_id) THEN
+        SET p_result = 2;
+    ELSE
+        DELETE FROM user_data WHERE id = p_id;
+        SET p_result = 1;
+    END IF;
+END $$
+
+-- 비밀번호 초기화 (관리자가 새 비밀번호를 정해 줌)
+DROP PROCEDURE IF EXISTS user_reset_password $$
+CREATE PROCEDURE user_reset_password(IN p_id INT, IN p_password_hash VARCHAR(255), OUT p_result INT)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION SET p_result = -1;
+    IF NOT EXISTS (SELECT 1 FROM user_data WHERE id = p_id) THEN
+        SET p_result = 2;
+    ELSE
+        UPDATE user_data SET password_hash = p_password_hash WHERE id = p_id;
+        SET p_result = 1;
+    END IF;
+END $$
+
 -- ===================== 트리거 =====================
 
 -- 수정 전 성적을 이력에 남김
