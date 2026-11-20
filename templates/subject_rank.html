@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}{{ school.schoolname }} 과목별 성적조회{% endblock title %}
+{% block content %}
+<h2 class="page_title">{{ school.schoolname }} 과목별 성적조회</h2>
+
+<!-- 과목을 고르면 바로 다시 조회 (디자인: 김상민 subject_rank.html) -->
+<form method="get" action="{{ url_for('subject_rank', schoolcode=school.schoolcode) }}">
+    <select id="subject_select" name="subject" class="form-select w-auto mb-3" onchange="this.form.submit()">
+        <optgroup label="과목">
+            {% for key, label in subjects.items() %}
+            <option value="{{ key }}" {{ 'selected' if key == subject }}>{{ label }}</option>
+            {% endfor %}
+        </optgroup>
+    </select>
+</form>
+
+<table class="table table-hover align-middle text-center">
+    <thead class="table-light">
+        <tr>
+            <th class="table-warning">{{ subjects[subject] }} 석차</th>
+            <th>번호</th><th>이름</th>
+            {% for key, label in subjects.items() %}
+            <th class="{{ 'table-warning' if key == subject }}">{{ label }}</th>
+            {% endfor %}
+            <th>평균</th><th>학점</th><th>학교 석차</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for s in object_list %}
+        <tr>
+            <td class="fw-bold">{{ s.subject_rank }}</td>
+            <td>{{ s.bunho }}</td><td>{{ s.name }}</td>
+            {% for key, label in subjects.items() %}
+            <td class="{{ 'fw-bold' if key == subject }}">{{ s[key] }}</td>
+            {% endfor %}
+            <td>{{ s.average }}</td><td>{{ s.grade }}</td><td>{{ s.ranks }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="10">등록된 학생이 없습니다.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock content %}

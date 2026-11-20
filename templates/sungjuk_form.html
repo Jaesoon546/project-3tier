@@ -3,7 +3,7 @@
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-sm-8 col-lg-5">
-        <h3 class="mb-3">{{ '성적 수정' if mode == 'update' else '학생 등록' }}</h3>
+        <h2 class="page_title">{{ '성적 수정' if mode == 'update' else '학생 등록' }}</h2>
 
         <!-- 등록·수정 공용 폼: mode에 따라 보낼 주소가 바뀜 -->
         <form name="sungjukForm" id="sungjukForm" method="post"

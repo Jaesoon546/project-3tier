@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}계정 관리{% endblock title %}
 {% block content %}
-<h3>계정 발급</h3>
+<h2 class="page_title">계정 발급</h2>
 <p class="text-secondary">교사·학생 계정은 관리자가 만들어 나눠 줍니다. 비밀번호는 해시로 바뀌어 저장됩니다.</p>
 
 <form id="userForm" class="row g-2 mb-5" action="{{ url_for('user_insert') }}" method="post">
@@ -49,9 +49,9 @@
     <div id="form_error" class="text-danger"></div>
 </form>
 
-<h3>계정 목록</h3>
+<h2 class="page_title">계정 목록</h2>
 <table class="table table-sm align-middle">
-    <thead>
+    <thead class="table-light text-center">
         <tr><th>아이디</th><th>이름</th><th>역할</th><th>학교</th><th>학생 번호</th><th>비밀번호 초기화</th><th>삭제</th></tr>
     </thead>
     <tbody>

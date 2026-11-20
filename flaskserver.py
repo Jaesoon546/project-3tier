@@ -163,7 +163,31 @@ def sungjuk_call(schoolcode):
     info = school.getSchool(schoolcode)
     if info is None:
         abort(404)
-    return render_template('sungjuk.html', school=info, object_list=student.getSungjuk(schoolcode))
+    # 관리자는 학교 선택 드롭다운으로 다른 학교 성적표로 이동할 수 있음
+    school_list = school.getSchoolList() if session['user']['role'] == 'admin' else []
+    return render_template('sungjuk.html', school=info, school_list=school_list,
+                           object_list=student.getSungjuk(schoolcode))
+
+
+SUBJECTS = {'kor': '국어', 'eng': '영어', 'mat': '수학', 'total': '총점'}
+
+
+@app.route('/subject_rank/<schoolcode>')
+@login_required('admin', 'teacher')
+def subject_rank(schoolcode):
+    """과목별 성적조회 — 고른 과목 점수 순으로 정렬하고 그 과목 석차를 매김 (디자인: 김상민)"""
+    check_school(schoolcode)
+    info = school.getSchool(schoolcode)
+    if info is None:
+        abort(404)
+    subject = request.args.get('subject', 'kor')
+    if subject not in SUBJECTS:
+        subject = 'kor'
+    rows = sorted(student.getSungjuk(schoolcode), key=lambda r: r[subject], reverse=True)
+    for row in rows:   # 같은 점수는 같은 석차 (SQL의 RANK()와 같은 규칙)
+        row['subject_rank'] = 1 + sum(other[subject] > row[subject] for other in rows)
+    return render_template('subject_rank.html', school=info, object_list=rows,
+                           subject=subject, subjects=SUBJECTS)
 
 
 @app.route('/sungjuk_insert', methods=['GET', 'POST'])

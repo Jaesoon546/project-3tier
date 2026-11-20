@@ -1,4 +1,4 @@
-# 학교별 성적관리 홈페이지 — 1차 팀 프로젝트
+# NIKE 성적관리시스템 — 1차 팀 프로젝트 (학교별 성적관리 홈페이지)
 
 여러 학교의 학생 성적을 웹에서 관리하는 3tier 홈페이지입니다 (브라우저 → Flask → MySQL).
 수업 Flask 실습(`flaskserver.py` + `dao/` + `templates/`) 구조를 뼈대로 사용했습니다.
@@ -63,6 +63,7 @@ python flaskserver.py      # http://127.0.0.1:5000
 | `/sungjuk_insert` | GET·POST | 교사 | 학생 등록 |
 | `/sungjuk_update` | POST | 교사 | bunho만 → 수정 폼, mode=save → 저장 |
 | `/sungjuk_delete` | POST | 교사 | 학생 삭제 |
+| `/subject_rank/<schoolcode>?subject=kor` | GET | 관리자·교사 | 과목별 성적조회 (과목 점수 순 + 과목 석차) |
 | `/stats/<schoolcode>` | GET | 관리자·교사 | 과목별 합계·평균·최고·최저 |
 | `/history/<schoolcode>` | GET | 관리자·교사 | 수정·삭제 이력 |
 | `/my_sungjuk` | GET | 학생 | 내 성적 |
