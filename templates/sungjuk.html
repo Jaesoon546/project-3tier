@@ -1,7 +1,18 @@
 {% extends "base.html" %}
 {% block title %}{{ school.schoolname }} 성적표{% endblock title %}
 {% block content %}
-<h3>{{ school.schoolname }} 성적표</h3>
+<h2 class="page_title">{{ school.schoolname }} 성적표</h2>
+
+{% if school_list %}
+<!-- 학교 선택 → 그 학교 성적표로 이동 (디자인: 김상민 school_rank.html의 onchange 방식) -->
+<select id="school_select" class="form-select w-auto mb-2" onchange="location.href=this.value">
+    <optgroup label="학교명">
+        {% for s in school_list %}
+        <option value="{{ url_for('sungjuk_call', schoolcode=s.schoolcode) }}" {{ 'selected' if s.schoolcode == school.schoolcode }}>{{ s.schoolname }}</option>
+        {% endfor %}
+    </optgroup>
+</select>
+{% endif %}
 
 <div class="d-flex gap-2 my-3">
     <!-- 이름 검색: static/js/search.js 가 /_search 를 AJAX로 호출 -->
@@ -14,8 +25,8 @@
     {% endif %}
 </div>
 
-<table class="table">
-    <thead>
+<table class="table table-hover align-middle text-center">
+    <thead class="table-light text-center">
         <tr>
             <th>등수</th><th>번호</th><th>이름</th><th>국어</th><th>영어</th><th>수학</th>
             <th>총점</th><th>평균</th><th>학점</th>

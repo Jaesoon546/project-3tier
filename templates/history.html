@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 {% block title %}{{ school.schoolname }} 수정 이력{% endblock title %}
 {% block content %}
-<h3>{{ school.schoolname }} 성적 수정 이력</h3>
+<h2 class="page_title">{{ school.schoolname }} 성적 수정 이력</h2>
 <p class="text-secondary">수정·삭제되기 <b>전</b>의 성적입니다. (student_data_backup 트리거 기록)</p>
-<table class="table table-sm">
-    <thead>
+<table class="table table-sm table-hover align-middle text-center">
+    <thead class="table-light text-center">
         <tr>
             <th>시간</th><th>작업</th><th>번호</th><th>이름</th>
             <th>국어</th><th>영어</th><th>수학</th><th>총점</th><th>평균</th><th>학점</th>

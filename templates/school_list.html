@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 {% block title %}학교 목록{% endblock title %}
 {% block content %}
-<h3>학교 목록</h3>
-<table class="table table-hover">
-    <thead>
+<h2 class="page_title">학교 목록</h2>
+<table class="table table-hover align-middle text-center">
+    <thead class="table-light text-center">
         <tr>
             <th>학교코드</th><th>학교명</th><th>주소</th><th>학생 수</th><th></th>
         </tr>
@@ -17,6 +17,7 @@
             <td>{{ s.studentcount }}</td>
             <td>
                 <a class="btn btn-sm btn-outline-primary" href="{{ url_for('sungjuk_call', schoolcode=s.schoolcode) }}">성적표</a>
+                <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('subject_rank', schoolcode=s.schoolcode) }}">과목별</a>
                 <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('stats', schoolcode=s.schoolcode) }}">통계</a>
                 <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('history', schoolcode=s.schoolcode) }}">이력</a>
             </td>
