@@ -21,7 +21,7 @@
     <button type="button" id="search_btn" class="btn btn-outline-primary">검색</button>
     <button type="button" id="reset_btn" class="btn btn-outline-secondary">전체</button>
     {% if session.user.role == 'teacher' %}
-    <a href="{{ url_for('sungjuk_insert') }}" class="btn btn-primary ms-auto">새로운 데이터 입력</a>
+    <a href="{{ url_for('sungjuk_insert') }}" class="btn btn-dark ms-auto">학생성적등록</a>
     {% endif %}
 </div>
 
@@ -30,7 +30,6 @@
         <tr>
             <th>등수</th><th>번호</th><th>이름</th><th>국어</th><th>영어</th><th>수학</th>
             <th>총점</th><th>평균</th><th>학점</th>
-            {% if session.user.role == 'teacher' %}<th>수정</th><th>삭제</th>{% endif %}
         </tr>
     </thead>
     <tbody id="sungjuk_body">
@@ -39,25 +38,9 @@
             <td>{{ sungjuk.ranks }}</td> <td>{{ sungjuk.bunho }}</td> <td>{{ sungjuk.name }}</td>
             <td>{{ sungjuk.kor }}</td> <td>{{ sungjuk.eng }}</td> <td>{{ sungjuk.mat }}</td>
             <td>{{ sungjuk.total }}</td> <td>{{ sungjuk.average }}</td> <td>{{ sungjuk.grade }}</td>
-            {% if session.user.role == 'teacher' %}
-            <td>
-                <form action="{{ url_for('sungjuk_update') }}" method="post">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <input type="hidden" name="bunho" value="{{ sungjuk.bunho }}">
-                    <button type="submit" class="btn btn-sm btn-outline-primary">성적 수정</button>
-                </form>
-            </td>
-            <td>
-                <form action="{{ url_for('sungjuk_delete') }}" method="post" class="delete-form">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <input type="hidden" name="bunho" value="{{ sungjuk.bunho }}">
-                    <button type="submit" class="btn btn-sm btn-outline-danger">성적 삭제</button>
-                </form>
-            </td>
-            {% endif %}
         </tr>
         {% else %}
-        <tr><td colspan="11">등록된 학생이 없습니다.</td></tr>
+        <tr><td colspan="9">등록된 학생이 없습니다.</td></tr>
         {% endfor %}
     </tbody>
 </table>
@@ -65,10 +48,4 @@
 
 {% block script %}
 <script src="{{ url_for('static', filename='js/search.js') }}"></script>
-<script>
-    // 삭제 전에 한 번 더 확인
-    $(".delete-form").on("submit", function () {
-        return confirm("정말 삭제할까요?");
-    });
-</script>
 {% endblock script %}

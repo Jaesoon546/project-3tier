@@ -40,7 +40,8 @@
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle px-3" href="#" role="button" data-bs-toggle="dropdown">학교관리</a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ url_for('school_list') }}">학교목록조회 · 등록</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('school_insert') }}">학교등록</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('school_list') }}">학교목록조회</a></li>
                         </ul>
                     </li>
                     <li class="nav-item dropdown">
@@ -49,30 +50,45 @@
                             <li><a class="dropdown-item" href="{{ url_for('user_list') }}">계정 발급 · 목록</a></li>
                         </ul>
                     </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle px-3" href="#" role="button" data-bs-toggle="dropdown">성적조회</a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{{ url_for('school_rank') }}">학교별 성적조회</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('subject_rank_first') }}">과목별 성적조회</a></li>
+                        </ul>
+                    </li>
                     {% elif me and me.role == 'teacher' %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle px-3" href="#" role="button" data-bs-toggle="dropdown">학생관리</a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ url_for('sungjuk_insert') }}">학생등록</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('sungjuk_call', schoolcode=me.schoolcode) }}">학생 수정 · 삭제</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('history', schoolcode=me.schoolcode) }}">수정이력조회</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('sungjuk_insert') }}">학생성적등록</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('sungjuk_update') }}">학생성적수정</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('sungjuk_delete') }}">학생정보삭제</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('history', schoolcode=me.schoolcode) }}">변경이력조회</a></li>
                         </ul>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle px-3" href="#" role="button" data-bs-toggle="dropdown">성적조회</a>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="{{ url_for('sungjuk_call', schoolcode=me.schoolcode) }}">학교 성적조회</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('subject_rank', schoolcode=me.schoolcode) }}">과목별 성적조회</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('school_rank') }}">학교별 성적조회</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('subject_rank_first') }}">과목별 성적조회</a></li>
                             <li><a class="dropdown-item" href="{{ url_for('stats', schoolcode=me.schoolcode) }}">과목 통계</a></li>
                         </ul>
                     </li>
                     {% elif me and me.role == 'student' %}
-                    <li class="nav-item"><a class="nav-link px-3" href="{{ url_for('my_sungjuk') }}">내 성적조회</a></li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle px-3" href="#" role="button" data-bs-toggle="dropdown">성적조회</a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{{ url_for('my_sungjuk') }}">학생 성적조회</a></li>
+                        </ul>
+                    </li>
                     {% endif %}
 
                     {% if me %}
                     <li class="nav-item"><span class="navbar-text px-3">{{ me.name }}</span></li>
-                    <li class="nav-item"><a class="btn btn-outline-light btn-sm" href="{{ url_for('logout') }}">로그아웃</a></li>
+                    <li class="nav-item"><a class="nav-link px-3" href="{{ url_for('logout') }}">로그아웃</a></li>
+                    {% else %}
+                    <li class="nav-item"><a class="nav-link px-3" href="{{ url_for('login') }}">로그인</a></li>
                     {% endif %}
                 </ul>
             </div>

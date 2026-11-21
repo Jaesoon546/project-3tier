@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block style %}
+<style>
+    /* 첫 화면 배경 — 디자인: 김상민 */
+    .main_background {
+        background-image: url("{{ url_for('static', filename='images/main_bg.jpg') }}");
+        background-size: cover;
+        background-position: center;
+        min-height: 100vh;
+        padding-top: 18vh;
+    }
+
+    /* 배경 그림 위에서도 글자가 잘 읽히도록 반투명 흰 상자 */
+    .main_text {
+        display: inline-block;
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 12px;
+        padding: 2rem 2.5rem;
+    }
+</style>
+{% endblock style %}
+
+{% block body %}
+<section class="main_background">
+    <div class="container">
+        <div class="main_text">
+            <h2>미래융합교육원과 함께하는</h2>
+            <h1 class="fw-bold">NIKE 성적관리시스템</h1>
+            <br>
+            <p>교육현장과 소통하고 협업하는 미래형 디지털플랫폼입니다.</p>
+            <a href="{{ url_for('login') }}" class="btn btn-dark px-4">로그인</a>
+        </div>
+    </div>
+</section>
+{% endblock body %}

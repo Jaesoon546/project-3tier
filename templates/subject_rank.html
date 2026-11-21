@@ -1,43 +1,60 @@
 {% extends "base.html" %}
 {% block title %}{{ school.schoolname }} 과목별 성적조회{% endblock title %}
+
+{% block style %}
+<style>
+    /* 정렬할 수 있는 제목 칸 — 디자인: 김상민 */
+    th.sortable { cursor: pointer; user-select: none; }
+    th.sortable:hover { background-color: #e9ecef; }
+    th.sortable.active { background-color: #f9eeda; }
+</style>
+{% endblock style %}
+
 {% block content %}
 <h2 class="page_title">{{ school.schoolname }} 과목별 성적조회</h2>
 
-<!-- 과목을 고르면 바로 다시 조회 (디자인: 김상민 subject_rank.html) -->
-<form method="get" action="{{ url_for('subject_rank', schoolcode=school.schoolcode) }}">
-    <select id="subject_select" name="subject" class="form-select w-auto mb-3" onchange="this.form.submit()">
-        <optgroup label="과목">
-            {% for key, label in subjects.items() %}
-            <option value="{{ key }}" {{ 'selected' if key == subject }}>{{ label }}</option>
+<div class="d-flex flex-wrap gap-2 mb-3">
+    {% if school_list %}
+    <select id="school_select" class="form-select w-auto" onchange="location.href=this.value">
+        <optgroup label="학교명">
+            {% for s in school_list %}
+            <option value="{{ url_for('subject_rank', schoolcode=s.schoolcode) }}" {{ 'selected' if s.schoolcode == school.schoolcode }}>{{ s.schoolname }}</option>
             {% endfor %}
         </optgroup>
     </select>
-</form>
+    {% endif %}
+    <input type="text" id="search" class="form-control w-auto" placeholder="🔍 이름 검색">
+</div>
+<p class="text-secondary small">과목 이름(⮃)을 누르면 그 과목 점수가 높은 순으로 정렬되고, 한 번 더 누르면 낮은 순으로 바뀝니다.</p>
 
-<table class="table table-hover align-middle text-center">
+<table class="table table-hover align-middle text-center" id="score_table">
     <thead class="table-light">
         <tr>
-            <th class="table-warning">{{ subjects[subject] }} 석차</th>
-            <th>번호</th><th>이름</th>
-            {% for key, label in subjects.items() %}
-            <th class="{{ 'table-warning' if key == subject }}">{{ label }}</th>
-            {% endfor %}
-            <th>평균</th><th>학점</th><th>학교 석차</th>
+            <th>번호</th>
+            <th>이름</th>
+            <th class="sortable" data-col="2">국어 <span class="sort-icon">⮃</span></th>
+            <th class="sortable" data-col="3">영어 <span class="sort-icon">⮃</span></th>
+            <th class="sortable" data-col="4">수학 <span class="sort-icon">⮃</span></th>
+            <th class="sortable" data-col="5">총점 <span class="sort-icon">⮃</span></th>
+            <th class="sortable" data-col="6">평균 <span class="sort-icon">⮃</span></th>
+            <th>학점</th>
+            <th>석차</th>
         </tr>
     </thead>
-    <tbody>
+    <tbody id="score_body">
         {% for s in object_list %}
         <tr>
-            <td class="fw-bold">{{ s.subject_rank }}</td>
-            <td>{{ s.bunho }}</td><td>{{ s.name }}</td>
-            {% for key, label in subjects.items() %}
-            <td class="{{ 'fw-bold' if key == subject }}">{{ s[key] }}</td>
-            {% endfor %}
-            <td>{{ s.average }}</td><td>{{ s.grade }}</td><td>{{ s.ranks }}</td>
+            <td>{{ s.bunho }}</td> <td class="student-name">{{ s.name }}</td>
+            <td>{{ s.kor }}</td> <td>{{ s.eng }}</td> <td>{{ s.mat }}</td>
+            <td>{{ s.total }}</td> <td>{{ s.average }}</td> <td>{{ s.grade }}</td> <td>{{ s.ranks }}</td>
         </tr>
         {% else %}
-        <tr><td colspan="10">등록된 학생이 없습니다.</td></tr>
+        <tr><td colspan="9">등록된 학생이 없습니다.</td></tr>
         {% endfor %}
     </tbody>
 </table>
 {% endblock content %}
+
+{% block script %}
+<script src="{{ url_for('static', filename='js/subject_rank.js') }}"></script>
+{% endblock script %}

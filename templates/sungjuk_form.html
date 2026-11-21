@@ -1,41 +1,54 @@
 {% extends "base.html" %}
-{% block title %}{{ '성적 수정' if mode == 'update' else '학생 등록' }}{% endblock title %}
+{% block title %}{{ '학생 성적 수정' if mode == 'update' else '성적 등록' }}{% endblock title %}
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-sm-8 col-lg-5">
-        <h2 class="page_title">{{ '성적 수정' if mode == 'update' else '학생 등록' }}</h2>
+<h2 class="page_title">{{ '학생 성적 수정' if mode == 'update' else '성적 등록' }}</h2>
 
-        <!-- 등록·수정 공용 폼: mode에 따라 보낼 주소가 바뀜 -->
-        <form name="sungjukForm" id="sungjukForm" method="post"
-              action="{{ url_for('sungjuk_update') if mode == 'update' else url_for('sungjuk_insert') }}">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            {% if mode == 'update' %}
-            <input type="hidden" name="bunho" value="{{ sungjuk.bunho }}">
-            <input type="hidden" name="mode" value="save">
-            {% endif %}
+<!-- 등록·수정 공용 폼: mode에 따라 보낼 주소가 바뀜
+     디자인: 김상민 sungjuk_insert.html — 표 한 줄에 입력칸을 두는 형태 -->
+<form name="sungjukForm" id="sungjukForm" method="post"
+      action="{{ url_for('sungjuk_update') if mode == 'update' else url_for('sungjuk_insert') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    {% if mode == 'update' %}
+    <input type="hidden" name="bunho" value="{{ sungjuk.bunho }}">
+    <input type="hidden" name="mode" value="save">
+    {% endif %}
 
-            <div class="mb-3">
-                <label for="name" class="form-label">이름</label>
-                <input type="text" class="form-control" id="name" name="name" value="{{ sungjuk.name or '' }}">
-            </div>
-            <div class="mb-3">
-                <label for="kor" class="form-label">국어</label>
-                <input type="number" class="form-control score" id="kor" name="kor" value="{{ sungjuk.kor if sungjuk.kor is not none else '' }}">
-            </div>
-            <div class="mb-3">
-                <label for="eng" class="form-label">영어</label>
-                <input type="number" class="form-control score" id="eng" name="eng" value="{{ sungjuk.eng if sungjuk.eng is not none else '' }}">
-            </div>
-            <div class="mb-3">
-                <label for="mat" class="form-label">수학</label>
-                <input type="number" class="form-control score" id="mat" name="mat" value="{{ sungjuk.mat if sungjuk.mat is not none else '' }}">
-            </div>
-            <div id="form_error" class="text-danger mb-2"></div>
-            <button type="submit" class="btn btn-primary">저장</button>
-            <a href="/" class="btn btn-secondary">취소</a>
-        </form>
-    </div>
-</div>
+    <table class="table align-middle text-center">
+        <thead class="table-light">
+            <tr>
+                {% if mode == 'update' %}<th>번호</th>{% endif %}
+                <th>이름</th><th>국어</th><th>영어</th><th>수학</th><th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                {% if mode == 'update' %}<td>{{ sungjuk.bunho }}</td>{% endif %}
+                <td>
+                    <label for="name" class="visually-hidden">이름</label>
+                    <input type="text" class="form-control" id="name" name="name" value="{{ sungjuk.name or '' }}">
+                </td>
+                <td>
+                    <label for="kor" class="visually-hidden">국어</label>
+                    <input type="number" class="form-control score" id="kor" name="kor" min="0" max="100" value="{{ sungjuk.kor if sungjuk.kor is not none else '' }}">
+                </td>
+                <td>
+                    <label for="eng" class="visually-hidden">영어</label>
+                    <input type="number" class="form-control score" id="eng" name="eng" min="0" max="100" value="{{ sungjuk.eng if sungjuk.eng is not none else '' }}">
+                </td>
+                <td>
+                    <label for="mat" class="visually-hidden">수학</label>
+                    <input type="number" class="form-control score" id="mat" name="mat" min="0" max="100" value="{{ sungjuk.mat if sungjuk.mat is not none else '' }}">
+                </td>
+                <td class="text-nowrap">
+                    <button type="submit" class="btn btn-dark" id="saveBtn">{{ '저장' if mode == 'update' else '등록' }}</button>
+                    <a href="{{ url_for('sungjuk_update') if mode == 'update' else url_for('home') }}" class="btn btn-outline-secondary">취소</a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <div id="form_error" class="text-danger mb-2"></div>
+</form>
+<p class="text-secondary small">학생은 로그인한 선생님의 학교로 등록됩니다. 총점·평균·학점은 저장할 때 자동으로 계산됩니다.</p>
 {% endblock content %}
 
 {% block script %}
