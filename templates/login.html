@@ -3,53 +3,55 @@
 
 {% block style %}
 <style>
-    /* 메인 배경 화면 — 디자인: 김상민 */
-    .main_background {
-        background-image: url("{{ url_for('static', filename='images/main_bg.png') }}");
-        background-size: cover;
-        background-position: center;
-        min-height: 100vh;
-        padding-top: 18vh;
+    /* 로그인 화면 — 디자인: 김상민 */
+    .login-wrapper {
+        max-width: 400px;
+        margin: 0 auto;
+    }
+
+    #login-form {
+        border: 1px solid #f1f1f1;
+        padding: 30px;
     }
 </style>
 {% endblock style %}
 
-{% block body %}
-<section class="main_background">
-    <div class="container">
-        <div class="row align-items-center g-5">
-            <div class="col-lg-7">
-                <h2>미래융합교육원과 함께하는</h2>
-                <h1 class="fw-bold">NIKE 성적관리시스템</h1>
-                <br>
-                <p>교육현장과 소통하고 협업하는 미래형 디지털플랫폼입니다.</p>
-            </div>
-
-            <div class="col-lg-5">
-                <div class="card shadow-sm">
-                    <div class="card-body p-4">
-                        <h4 class="fw-bold mb-3">로그인</h4>
-                        {% with messages = get_flashed_messages() %}
-                        {% for message in messages %}
-                        <div class="alert alert-info py-2">{{ message }}</div>
-                        {% endfor %}
-                        {% endwith %}
-                        <form action="{{ url_for('login') }}" method="post">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                            <div class="mb-3">
-                                <label for="login_id" class="form-label">아이디</label>
-                                <input type="text" class="form-control" id="login_id" name="login_id" required autofocus>
-                            </div>
-                            <div class="mb-3">
-                                <label for="password" class="form-label">비밀번호</label>
-                                <input type="password" class="form-control" id="password" name="password" required>
-                            </div>
-                            <button type="submit" class="btn btn-dark w-100">로그인</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
+{% block content %}
+<div class="login-wrapper">
+    <h2 class="page_title">로그인</h2>
+    <form method="post" action="{{ url_for('login') }}" id="login-form" class="shadow-sm">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="text" class="form-control mb-2" id="login_id" name="login_id" placeholder="ID" required>
+        <input type="password" class="form-control mb-2" id="password" name="password" placeholder="Password" required>
+        <div class="form-check mb-3">
+            <input type="checkbox" class="form-check-input" id="remember-check">
+            <label class="form-check-label" for="remember-check">아이디 저장하기</label>
         </div>
-    </div>
-</section>
-{% endblock body %}
+        <button type="submit" class="btn btn-dark w-100">로그인</button>
+    </form>
+</div>
+{% endblock content %}
+
+{% block script %}
+<script>
+    // 아이디 저장하기: 이 브라우저에만 아이디를 기억함 (비밀번호는 저장하지 않음)
+    var KEY = "saved_login_id";
+    try {
+        var saved = localStorage.getItem(KEY);
+        if (saved) {
+            $("#login_id").val(saved);
+            $("#remember-check").prop("checked", true);
+            $("#password").trigger("focus");
+        } else {
+            $("#login_id").trigger("focus");
+        }
+    } catch (e) { /* 저장소를 못 쓰는 브라우저면 그냥 넘어감 */ }
+
+    $("#login-form").on("submit", function () {
+        try {
+            if ($("#remember-check").is(":checked")) localStorage.setItem(KEY, $("#login_id").val());
+            else localStorage.removeItem(KEY);
+        } catch (e) { }
+    });
+</script>
+{% endblock script %}

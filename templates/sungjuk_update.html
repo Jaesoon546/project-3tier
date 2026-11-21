@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}학생 성적 수정{% endblock title %}
+{% block content %}
+<h2 class="page_title">학생 성적 수정</h2>
+
+<!-- 디자인: 김상민 sungjuk_update.html — 폼 하나에 표 전체를 넣고, 누른 버튼의 value(bunho)가 전송됨 -->
+<form name="updateForm" id="updateForm" action="{{ url_for('sungjuk_update') }}" method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <table class="table table-hover align-middle text-center">
+        <thead class="table-light">
+            <tr>
+                <th>번호</th><th>이름</th><th>국어</th><th>영어</th><th>수학</th>
+                <th>총점</th><th>평균</th><th>학점</th><th>석차</th><th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for sungjuk in object_list %}
+            <tr>
+                <td>{{ sungjuk.bunho }}</td> <td>{{ sungjuk.name }}</td>
+                <td>{{ sungjuk.kor }}</td> <td>{{ sungjuk.eng }}</td> <td>{{ sungjuk.mat }}</td>
+                <td>{{ sungjuk.total }}</td> <td>{{ sungjuk.average }}</td> <td>{{ sungjuk.grade }}</td>
+                <td>{{ sungjuk.ranks }}</td>
+                <td><button type="submit" name="bunho" value="{{ sungjuk.bunho }}" class="btn btn-sm btn-outline-primary">수정</button></td>
+            </tr>
+            {% else %}
+            <tr><td colspan="10">등록된 학생이 없습니다.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</form>
+{% endblock content %}

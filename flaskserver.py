@@ -50,7 +50,7 @@ def home():
     """역할별 첫 화면으로 보냄"""
     me = session.get('user')
     if not me:
-        return redirect(url_for('login'))
+        return render_template('index.html')   # 로그인 전: 메인 배경 첫 화면
     if me['role'] == 'admin':
         return redirect(url_for('school_list'))
     if me['role'] == 'teacher':
@@ -73,25 +73,35 @@ def login():
 @app.route('/logout')
 def logout():
     session.clear()
-    return redirect(url_for('login'))
+    return redirect(url_for('home'))
 
 
 # ===================== 학교 (관리자) =====================
 
-@app.route('/school_list', methods=['GET', 'POST'])
+@app.route('/school_list')
 @login_required('admin')
 def school_list():
-    if request.method == 'POST':   # 학교 등록
+    return render_template('school_list.html', object_list=school.getSchoolList())
+
+
+@app.route('/school_insert', methods=['GET', 'POST'])
+@login_required('admin')
+def school_insert():
+    """학교 등록 화면 (디자인: 김상민 school_insert.html)"""
+    if request.method == 'POST':
         code = request.form.get('schoolcode', '').strip()
         name = request.form.get('schoolname', '').strip()
         address = request.form.get('address', '').strip()
         if not code or not name:
             flash('학교코드와 학교명을 입력하세요.')
-        else:
-            result = school.insertSchool(code, name, address)
-            flash('학교가 등록되었습니다.' if result == 1 else '등록 실패 (학교코드 중복 등)')
+            return render_template('school_insert.html', form=request.form)
+        result = school.insertSchool(code, name, address)
+        if result != 1:
+            flash('등록 실패 (학교코드 중복 등)')
+            return render_template('school_insert.html', form=request.form)
+        flash(f'{name}을(를) 등록했습니다.')
         return redirect(url_for('school_list'))
-    return render_template('school_list.html', object_list=school.getSchoolList())
+    return render_template('school_insert.html', form={})
 
 
 # ===================== 계정 발급 (관리자) =====================
@@ -169,25 +179,48 @@ def sungjuk_call(schoolcode):
                            object_list=student.getSungjuk(schoolcode))
 
 
-SUBJECTS = {'kor': '국어', 'eng': '영어', 'mat': '수학', 'total': '총점'}
+def default_schoolcode():
+    """메뉴에서 학교를 고르지 않고 들어올 때: 교사는 자기 학교, 관리자는 목록의 첫 학교"""
+    me = session['user']
+    if me['role'] == 'teacher':
+        return me['schoolcode']
+    schools = school.getSchoolList()
+    return schools[0]['schoolcode'] if schools else None
+
+
+@app.route('/school_rank')
+@login_required('admin', 'teacher')
+def school_rank():
+    """메뉴 '학교별 성적조회' → 학교별 성적표로 이동"""
+    code = default_schoolcode()
+    if code is None:
+        flash('등록된 학교가 없습니다.')
+        return redirect(url_for('home'))
+    return redirect(url_for('sungjuk_call', schoolcode=code))
+
+
+@app.route('/subject_rank')
+@login_required('admin', 'teacher')
+def subject_rank_first():
+    """메뉴 '과목별 성적조회' → 과목별 성적조회로 이동"""
+    code = default_schoolcode()
+    if code is None:
+        flash('등록된 학교가 없습니다.')
+        return redirect(url_for('home'))
+    return redirect(url_for('subject_rank', schoolcode=code))
 
 
 @app.route('/subject_rank/<schoolcode>')
 @login_required('admin', 'teacher')
 def subject_rank(schoolcode):
-    """과목별 성적조회 — 고른 과목 점수 순으로 정렬하고 그 과목 석차를 매김 (디자인: 김상민)"""
+    """과목별 성적조회 — 과목 제목을 누르면 그 과목 순으로 정렬, 이름 검색 (디자인: 김상민, 정렬은 브라우저 JS)"""
     check_school(schoolcode)
     info = school.getSchool(schoolcode)
     if info is None:
         abort(404)
-    subject = request.args.get('subject', 'kor')
-    if subject not in SUBJECTS:
-        subject = 'kor'
-    rows = sorted(student.getSungjuk(schoolcode), key=lambda r: r[subject], reverse=True)
-    for row in rows:   # 같은 점수는 같은 석차 (SQL의 RANK()와 같은 규칙)
-        row['subject_rank'] = 1 + sum(other[subject] > row[subject] for other in rows)
-    return render_template('subject_rank.html', school=info, object_list=rows,
-                           subject=subject, subjects=SUBJECTS)
+    school_list = school.getSchoolList() if session['user']['role'] == 'admin' else []
+    return render_template('subject_rank.html', school=info, school_list=school_list,
+                           object_list=student.getSungjuk(schoolcode))
 
 
 @app.route('/sungjuk_insert', methods=['GET', 'POST'])
@@ -205,10 +238,14 @@ def sungjuk_insert():
     return render_template('sungjuk_form.html', mode='insert', sungjuk={})
 
 
-@app.route('/sungjuk_update', methods=['POST'])
+@app.route('/sungjuk_update', methods=['GET', 'POST'])
 @login_required('teacher')
 def sungjuk_update():
-    """성적표의 [수정] → 폼 보여주기, 폼의 [저장] (mode=save) → DB 수정"""
+    """GET: 수정할 학생 목록 (디자인: 김상민 sungjuk_update.html)
+    POST: 목록의 [수정] → 폼 보여주기, 폼의 [저장] (mode=save) → DB 수정"""
+    if request.method == 'GET':
+        return render_template('sungjuk_update.html',
+                               object_list=student.getSungjuk(session['user']['schoolcode']))
     bunho = request.form.get('bunho', type=int)
     target = student.getStudent(bunho)
     if target is None:
@@ -225,12 +262,16 @@ def sungjuk_update():
         return render_template('sungjuk_form.html', mode='update', sungjuk=request.form)
     result = student.updateStudent(bunho, new_student)
     flash(RESULT_MESSAGE.get(result, '알 수 없음'))
-    return redirect(url_for('sungjuk_call', schoolcode=target['schoolcode']))
+    return redirect(url_for('sungjuk_update'))
 
 
-@app.route('/sungjuk_delete', methods=['POST'])
+@app.route('/sungjuk_delete', methods=['GET', 'POST'])
 @login_required('teacher')
 def sungjuk_delete():
+    """GET: 삭제할 학생 목록 (디자인: 김상민 sungjuk_delete.html), POST: 삭제"""
+    if request.method == 'GET':
+        return render_template('sungjuk_delete.html',
+                               object_list=student.getSungjuk(session['user']['schoolcode']))
     bunho = request.form.get('bunho', type=int)
     target = student.getStudent(bunho)
     if target is None:
@@ -239,7 +280,7 @@ def sungjuk_delete():
     check_school(target['schoolcode'])
     result = student.deleteStudent(bunho)
     flash(RESULT_MESSAGE.get(result, '알 수 없음'))
-    return redirect(url_for('sungjuk_call', schoolcode=target['schoolcode']))
+    return redirect(url_for('sungjuk_delete'))
 
 
 @app.route('/stats/<schoolcode>')

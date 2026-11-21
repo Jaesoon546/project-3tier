@@ -19,7 +19,7 @@ school_sungjuk/
 │   ├── grade.py            # Student 클래스 — 총점·평균·학점, 점수 검사
 │   └── account.py          # 계정 발급 폼 검사
 ├── templates/              # 모두 base.html 상속
-├── static/js/              # form_check.js (폼 검사), search.js (AJAX 검색), user_form.js (계정 발급)
+├── static/js/              # form_check.js (폼 검사), search.js (AJAX 검색), user_form.js (계정 발급), subject_rank.js (정렬·검색)
 └── sql/                    # schema → procedures → school_data → student_data → user_data 순서로 실행
 ```
 
@@ -54,16 +54,19 @@ python flaskserver.py      # http://127.0.0.1:5000
 
 | 라우트 | 방식 | 권한 | 내용 |
 |---|---|---|---|
-| `/login`, `/logout` | GET·POST | 모두 | 로그인 |
-| `/school_list` | GET·POST | 관리자 | 학교 목록·등록 |
+| `/` | GET | 모두 | 로그인 전: 첫 화면(메인 배경) / 로그인 후: 역할별 첫 화면으로 이동 |
+| `/login`, `/logout` | GET·POST | 모두 | 로그인 (아이디 저장하기) |
+| `/school_list` | GET | 관리자 | 학교목록조회 |
+| `/school_insert` | GET·POST | 관리자 | 학교 등록 |
 | `/user_list` | GET | 관리자 | 계정 목록 + 계정 발급 폼 |
 | `/user_insert` | POST | 관리자 | 계정 발급 (교사·학생·관리자) |
 | `/user_reset`, `/user_delete` | POST | 관리자 | 비밀번호 초기화, 계정 삭제 |
-| `/sungjuk_call/<schoolcode>` | GET | 관리자·교사 | 학교별 성적표 (등수 순) |
+| `/school_rank` | GET | 관리자·교사 | 메뉴 '학교별 성적조회' → 성적표로 이동 |
+| `/sungjuk_call/<schoolcode>` | GET | 관리자·교사 | 학교별 성적표 (등수 순, 조회 전용) |
 | `/sungjuk_insert` | GET·POST | 교사 | 학생 등록 |
-| `/sungjuk_update` | POST | 교사 | bunho만 → 수정 폼, mode=save → 저장 |
-| `/sungjuk_delete` | POST | 교사 | 학생 삭제 |
-| `/subject_rank/<schoolcode>?subject=kor` | GET | 관리자·교사 | 과목별 성적조회 (과목 점수 순 + 과목 석차) |
+| `/sungjuk_update` | GET·POST | 교사 | GET: 수정할 학생 목록 / bunho만 → 수정 폼 / mode=save → 저장 |
+| `/sungjuk_delete` | GET·POST | 교사 | GET: 삭제할 학생 목록 / POST: 삭제 |
+| `/subject_rank`, `/subject_rank/<schoolcode>` | GET | 관리자·교사 | 과목별 성적조회 (과목 제목 클릭 정렬, 이름 검색) |
 | `/stats/<schoolcode>` | GET | 관리자·교사 | 과목별 합계·평균·최고·최저 |
 | `/history/<schoolcode>` | GET | 관리자·교사 | 수정·삭제 이력 |
 | `/my_sungjuk` | GET | 학생 | 내 성적 |
