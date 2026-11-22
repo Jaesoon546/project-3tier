@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% import "_parts.html" as parts with context %}
 {% block title %}학생 정보 삭제{% endblock title %}
 {% block content %}
 <h2 class="page_title">학생 정보 삭제</h2>
@@ -23,7 +24,7 @@
                 <td><button type="submit" name="bunho" value="{{ sungjuk.bunho }}" data-name="{{ sungjuk.name }}" class="btn btn-sm btn-outline-danger delete-btn">삭제</button></td>
             </tr>
             {% else %}
-            <tr><td colspan="10">등록된 학생이 없습니다.</td></tr>
+            {{ parts.empty_row(10, '등록된 학생이 없습니다.') }}
             {% endfor %}
         </tbody>
     </table>

@@ -1,18 +1,31 @@
 {% extends "base.html" %}
+{% import "_parts.html" as parts with context %}
 {% block title %}학교 목록{% endblock title %}
 {% block content %}
 <h2 class="page_title">학교목록조회</h2>
+<p class="text-secondary small text-center">학교 사진이나 이름을 누르면 학교 홈페이지가 새 탭으로 열립니다.</p>
 <table class="table table-hover align-middle text-center">
     <thead class="table-light text-center">
         <tr>
-            <th>학교코드</th><th>학교명</th><th>주소</th><th>학생 수</th><th></th>
+            <th>사진</th><th>학교코드</th><th>학교명</th><th>주소</th><th>학생 수</th><th></th>
         </tr>
     </thead>
     <tbody>
         {% for s in object_list %}
         <tr>
+            <td>
+                {% set img = school_image(s.schoolcode) %}
+                {% if img and s.homepage %}
+                <a href="{{ s.homepage }}" target="_blank" rel="noopener noreferrer" title="{{ s.schoolname }} 홈페이지 열기"><img src="{{ img }}" alt="{{ s.schoolname }} 사진 (홈페이지로 이동)" class="school-thumb"></a>
+                {% elif img %}
+                <img src="{{ img }}" alt="{{ s.schoolname }} 사진" class="school-thumb">
+                {% endif %}
+            </td>
             <td>{{ s.schoolcode }}</td>
-            <td>{{ s.schoolname }}</td>
+            <td>
+                {% if s.homepage %}<a href="{{ s.homepage }}" target="_blank" rel="noopener noreferrer">{{ s.schoolname }} ↗</a>
+                {% else %}{{ s.schoolname }}{% endif %}
+            </td>
             <td>{{ s.address }}</td>
             <td>{{ s.studentcount }}</td>
             <td>
@@ -23,7 +36,7 @@
             </td>
         </tr>
         {% else %}
-        <tr><td colspan="5">등록된 학교가 없습니다.</td></tr>
+        {{ parts.empty_row(6, '등록된 학교가 없습니다.') }}
         {% endfor %}
     </tbody>
 </table>

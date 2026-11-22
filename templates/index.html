@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% import "_parts.html" as parts with context %}
 
 {% block style %}
 <style>
@@ -26,8 +27,8 @@
     <div class="container">
         {% for message in get_flashed_messages() %}
         <!-- 로그아웃 완료 등 안내 (첫 화면은 body 블록을 바꿔서 base의 알림 자리가 없음) -->
-        <div class="alert alert-info alert-dismissible fade show w-auto d-inline-block mb-3">
-            {{ message }}
+        <div class="alert alert-info alert-dismissible fade show w-auto d-inline-flex align-items-center gap-2 mb-3">
+            {{ parts.yuni(3, 56) }} {{ message }}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div><br>
         {% endfor %}

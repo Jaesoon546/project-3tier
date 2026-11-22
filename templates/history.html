@@ -1,7 +1,9 @@
 {% extends "base.html" %}
+{% import "_parts.html" as parts with context %}
 {% block title %}{{ school.schoolname }} 변경이력조회{% endblock title %}
 {% block content %}
 <h2 class="page_title">{{ school.schoolname }} 변경이력조회</h2>
+{{ parts.school_banner(school) }}
 
 {% if school_list %}
 <!-- 관리자: 학교 선택 → 그 학교 이력으로 이동 -->
@@ -33,12 +35,12 @@
             <td>{{ row.action_time }}</td>
             <td>{{ row.changer_name or '-' }}</td>
             <td><span class="badge {{ label[1] }}">{{ label[0] }}</span></td>
-            <td>{{ row.bunho }}</td> <td>{{ row.name }}</td>
+            <td>{{ row.bunho }}</td> <td><a href="{{ url_for('student_history', bunho=row.bunho) }}" title="이 학생의 이력만 보기">{{ row.name }}</a></td>
             <td>{{ row.kor }}</td> <td>{{ row.eng }}</td> <td>{{ row.mat }}</td>
             <td>{{ row.total }}</td> <td>{{ row.average }}</td> <td>{{ row.grade }}</td>
         </tr>
         {% else %}
-        <tr><td colspan="11">이력이 없습니다.</td></tr>
+        {{ parts.empty_row(11, '이력이 없습니다.') }}
         {% endfor %}
     </tbody>
 </table>

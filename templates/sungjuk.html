@@ -1,7 +1,9 @@
 {% extends "base.html" %}
+{% import "_parts.html" as parts with context %}
 {% block title %}{{ school.schoolname }} 성적표{% endblock title %}
 {% block content %}
 <h2 class="page_title">{{ school.schoolname }} 성적표</h2>
+{{ parts.school_banner(school) }}
 
 {% if school_list %}
 <!-- 학교 선택 → 그 학교 성적표로 이동 (디자인: 김상민 school_rank.html의 onchange 방식) -->
@@ -35,12 +37,12 @@
     <tbody id="sungjuk_body">
         {% for sungjuk in object_list %}
         <tr>
-            <td>{{ sungjuk.ranks }}</td> <td>{{ sungjuk.bunho }}</td> <td>{{ sungjuk.name }}</td>
+            <td>{{ sungjuk.ranks }}</td> <td>{{ sungjuk.bunho }}</td> <td><a href="{{ url_for('student_history', bunho=sungjuk.bunho) }}" title="이 학생의 변경이력">{{ sungjuk.name }}</a></td>
             <td>{{ sungjuk.kor }}</td> <td>{{ sungjuk.eng }}</td> <td>{{ sungjuk.mat }}</td>
             <td>{{ sungjuk.total }}</td> <td>{{ sungjuk.average }}</td> <td>{{ sungjuk.grade }}</td>
         </tr>
         {% else %}
-        <tr><td colspan="9">등록된 학생이 없습니다.</td></tr>
+        {{ parts.empty_row(9, '등록된 학생이 없습니다.') }}
         {% endfor %}
     </tbody>
 </table>

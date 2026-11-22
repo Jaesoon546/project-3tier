@@ -33,6 +33,7 @@ pip install -r requirements.txt
 #    처음 만들 때: schema.sql → procedures.sql
 #    이미 만든 DB의 데이터를 비울 때: reset_data.sql
 #    이미 만든 DB에 구조 변경이 생겼을 때: sql/migrations/ 의 새 파일을 한 번 실행 → procedures.sql 다시 실행
+#      001_history_changed_by.sql (변경자), 002_school_homepage.sql (학교 홈페이지)
 #    (schema.sql은 테이블을 지우고 다시 만들므로 다시 실행하지 않음)
 
 # 3) 접속 정보는 환경변수로 (코드·문서에 비밀번호를 적지 않음)
@@ -80,6 +81,7 @@ python flaskserver.py      # http://127.0.0.1:5000
 | `/subject_rank`, `/subject_rank/<schoolcode>` | GET | 관리자·교사 | 과목별 성적조회 (과목 제목 클릭 정렬, 이름 검색) |
 | `/stats/<schoolcode>` | GET | 관리자·교사 | 과목별 합계·평균·최고·최저 |
 | `/history`, `/history/<schoolcode>` | GET | 관리자·교사 | 변경이력조회: 등록·수정·삭제 이력과 변경자 (메뉴는 기본 학교로 이동, 관리자는 학교 선택) |
+| `/history/student/<bunho>` | GET | 관리자·교사 | 학생 한 명의 등록·수정·삭제 이력 (성적표·변경이력에서 이름 클릭, 삭제된 학생도 조회) |
 | `/my_sungjuk` | GET | 학생 | 내 성적 |
 | `/_search?schoolcode=&name=` | GET (JSON) | 관리자·교사 | 이름 검색 (AJAX) |
 
@@ -99,3 +101,9 @@ python flaskserver.py      # http://127.0.0.1:5000
 
 관리자로 로그인 → **계정 관리**에서 역할·학교·(학생이면) 연결할 학생을 고르고 아이디·초기 비밀번호를 입력합니다.
 비밀번호는 서버에서 해시로 바꿔 저장하므로 `make_password.py`는 SQL로 직접 넣을 때만 필요합니다.
+
+## 화면 자료
+
+- 학교 사진: `static/images/schools/<학교코드>.jpg` — 있으면 학교별 화면 위 배너와 학교목록에 표시, 누르면 학교 홈페이지(school_data.homepage)가 새 탭으로 열림
+- 캐릭터 yuni: `static/images/yuni/` — 로그인, 로그아웃 안내, 내 성적, 빈 목록 화면
+- 사진·캐릭터: 김상민 (1200px 이하로 줄여서 저장)

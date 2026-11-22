@@ -1,7 +1,9 @@
 {% extends "base.html" %}
+{% import "_parts.html" as parts with context %}
 {% block title %}{{ school.schoolname }} 통계{% endblock title %}
 {% block content %}
 <h2 class="page_title">{{ school.schoolname }} 과목별 통계</h2>
+{{ parts.school_banner(school) }}
 <table class="table table-hover align-middle text-center">
     <thead class="table-light text-center">
         <tr><th>과목</th><th>합계</th><th>평균</th><th>최고</th><th>최저</th></tr>

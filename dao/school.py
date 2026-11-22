@@ -9,5 +9,5 @@ def getSchool(schoolcode):
     return select_proc_one("school_select_one", (schoolcode,))
 
 
-def insertSchool(schoolcode, schoolname, address):
-    return result_proc("school_insert", (schoolcode, schoolname, address, 0))
+def insertSchool(schoolcode, schoolname, address, homepage=None):
+    return result_proc("school_insert", (schoolcode, schoolname, address, homepage, 0))
