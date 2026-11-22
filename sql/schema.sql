@@ -1,5 +1,5 @@
 -- 학교별 성적관리 홈페이지 — 테이블 생성
--- 실행 순서: schema.sql → procedures.sql → school_data.sql → student_data.sql → user_data.sql
+-- 실행 순서: schema.sql → procedures.sql → (터미널) python seed_data.py
 -- 주의: 테이블을 지우고 다시 만듦. 이미 만든 DB에서 데이터만 바꿀 때는 reset_data.sql 사용
 -- MySQL 8.0 이상 (등수 계산에 RANK() 윈도우 함수 사용)
 

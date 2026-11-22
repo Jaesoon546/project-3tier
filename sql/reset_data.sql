@@ -1,5 +1,5 @@
 -- 이미 만들어 둔 DB의 데이터만 비우기 (테이블·프로시저·트리거는 그대로)
--- 데이터를 새로 넣을 때: reset_data.sql → school_data.sql → student_data.sql → user_data.sql
+-- 데이터를 새로 넣을 때: reset_data.sql 실행 → 터미널에서 python seed_data.py
 -- 주의: 계정·성적·이력이 모두 지워집니다. schema.sql은 다시 실행하지 마세요.
 USE school_sungjuk;
 
