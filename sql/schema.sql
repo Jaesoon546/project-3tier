@@ -1,5 +1,6 @@
 -- 학교별 성적관리 홈페이지 — 테이블 생성
--- 실행 순서: schema.sql → procedures.sql → school_data.sql → student_data.sql → user_data.sql
+-- 실행 순서: schema.sql → procedures.sql → (터미널) python seed_data.py
+-- 주의: 테이블을 지우고 다시 만듦. 이미 만든 DB에서 데이터만 바꿀 때는 reset_data.sql 사용
 -- MySQL 8.0 이상 (등수 계산에 RANK() 윈도우 함수 사용)
 
 CREATE DATABASE IF NOT EXISTS school_sungjuk DEFAULT CHARACTER SET utf8mb4;
@@ -12,7 +13,7 @@ DROP TABLE IF EXISTS school_data;
 
 -- 학교
 CREATE TABLE school_data (
-    schoolcode   VARCHAR(10)  NOT NULL PRIMARY KEY,   -- 예: DJ00000001
+    schoolcode   VARCHAR(10)  NOT NULL PRIMARY KEY,   -- 예: DJ001
     schoolname   VARCHAR(50)  NOT NULL,
     address      VARCHAR(100),
     studentcount INT          DEFAULT 0

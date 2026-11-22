@@ -30,7 +30,9 @@ school_sungjuk/
 pip install -r requirements.txt
 
 # 2) DB 만들기 — HeidiSQL에서 sql/ 파일을 아래 순서대로 실행
-#    schema.sql → procedures.sql → school_data.sql → student_data.sql → user_data.sql
+#    처음 만들 때: schema.sql → procedures.sql
+#    이미 만든 DB의 데이터를 비울 때: reset_data.sql
+#    (schema.sql은 테이블을 지우고 다시 만들므로 다시 실행하지 않음)
 
 # 3) 접속 정보는 환경변수로 (코드·문서에 비밀번호를 적지 않음)
 export DB_HOST=<DB 서버 IP>
@@ -38,7 +40,11 @@ export DB_USER=root
 export DB_PASSWORD=<비밀번호>
 export SECRET_KEY=<아무 긴 문자열>
 
-# 4) 서버 실행
+# 4) 테스트 데이터 넣기 (DB가 비어 있을 때 한 번)
+#    data/*.csv의 점수만 읽고, 총점·평균·학점은 service/grade.py가 계산해서 저장
+python seed_data.py
+
+# 5) 서버 실행
 python flaskserver.py      # http://127.0.0.1:5000
 ```
 
@@ -46,9 +52,12 @@ python flaskserver.py      # http://127.0.0.1:5000
 
 | 아이디 | 역할 | 볼 수 있는 것 |
 |---|---|---|
-| admin | 관리자 | 학교 목록·등록, 계정 발급·관리, 모든 학교 성적표·통계·이력 (조회만) |
-| teacher1 / teacher2 / teacher3 | 교사 | 자기 학교 성적표, 학생 등록·수정·삭제, 통계, 이력, 검색 |
-| student1 / student6 / student11 | 학생 | 내 성적 |
+| admin01 | 관리자 | 학교 목록·등록, 계정 발급·관리, 모든 학교 성적표·통계·이력 (조회만) |
+| tea_dj001 / tea_dj002 / tea_dj003 | 교사 (대전고 / 충남고 / 유성고) | 자기 학교 성적표, 학생 등록·수정·삭제, 통계, 이력, 검색 |
+| stu_01 ~ stu_30 | 학생 (01~10 대전고, 11~20 충남고, 21~30 유성고) | 내 성적 |
+
+데이터(`data/schools.csv`, `data/students.csv`)·아이디 체계: DB 담당 김현준. 학교 3개 × 학생 10명.
+학생 계정 `stu_NN`의 NN은 DB가 매긴 학생 번호(bunho)입니다.
 
 ## 라우트
 
