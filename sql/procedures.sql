@@ -79,10 +79,11 @@ DROP PROCEDURE IF EXISTS student_insert $$
 CREATE PROCEDURE student_insert(
     IN p_name VARCHAR(20), IN p_kor INT, IN p_mat INT, IN p_eng INT,
     IN p_total INT, IN p_average DECIMAL(5,2), IN p_grade CHAR(1),
-    IN p_schoolcode VARCHAR(10),
+    IN p_schoolcode VARCHAR(10), IN p_changed_by VARCHAR(30),
     OUT p_result INT)
 BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION SET p_result = -1;
+    SET @changed_by = p_changed_by;   -- 트리거가 이력에 '누가'를 적을 때 읽음
     INSERT INTO student_data(name, kor, mat, eng, total, average, grade, schoolcode)
     VALUES (p_name, p_kor, p_mat, p_eng, p_total, p_average, p_grade, p_schoolcode);
     SET p_result = 1;
@@ -91,13 +92,14 @@ END $$
 DROP PROCEDURE IF EXISTS student_update $$
 CREATE PROCEDURE student_update(
     IN p_bunho INT, IN p_name VARCHAR(20), IN p_kor INT, IN p_mat INT, IN p_eng INT,
-    IN p_total INT, IN p_average DECIMAL(5,2), IN p_grade CHAR(1),
+    IN p_total INT, IN p_average DECIMAL(5,2), IN p_grade CHAR(1), IN p_changed_by VARCHAR(30),
     OUT p_result INT)
 BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION SET p_result = -1;
     IF NOT EXISTS (SELECT 1 FROM student_data WHERE bunho = p_bunho) THEN
         SET p_result = 2;
     ELSE
+        SET @changed_by = p_changed_by;
         UPDATE student_data
         SET name = p_name, kor = p_kor, mat = p_mat, eng = p_eng,
             total = p_total, average = p_average, grade = p_grade
@@ -107,12 +109,13 @@ BEGIN
 END $$
 
 DROP PROCEDURE IF EXISTS student_delete $$
-CREATE PROCEDURE student_delete(IN p_bunho INT, OUT p_result INT)
+CREATE PROCEDURE student_delete(IN p_bunho INT, IN p_changed_by VARCHAR(30), OUT p_result INT)
 BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION SET p_result = -1;
     IF NOT EXISTS (SELECT 1 FROM student_data WHERE bunho = p_bunho) THEN
         SET p_result = 2;
     ELSE
+        SET @changed_by = p_changed_by;
         DELETE FROM student_data WHERE bunho = p_bunho;
         SET p_result = 1;
     END IF;
@@ -133,15 +136,18 @@ BEGIN
     FROM student_data WHERE schoolcode = p_schoolcode;
 END $$
 
--- 성적 수정·삭제 이력 (최근 순)
+-- 학생 등록·성적 수정·삭제 이력 (최근 순)
+--   변경자: 계정이 있으면 계정 이름, 계정이 지워졌으면 login_id, DB에서 직접 바꿨으면 NULL
 DROP PROCEDURE IF EXISTS history_select $$
 CREATE PROCEDURE history_select(IN p_schoolcode VARCHAR(10))
 BEGIN
-    SELECT log_id, bunho, name, kor, eng, mat, total, average, grade,
-           action_log, action_time
-    FROM student_data_backup
-    WHERE schoolcode = p_schoolcode
-    ORDER BY action_time DESC, log_id DESC;
+    SELECT b.log_id, b.bunho, b.name, b.kor, b.eng, b.mat, b.total, b.average, b.grade,
+           b.action_log, b.action_time, b.changed_by,
+           COALESCE(u.name, b.changed_by) AS changer_name
+    FROM student_data_backup b
+    LEFT JOIN user_data u ON u.login_id = b.changed_by
+    WHERE b.schoolcode = p_schoolcode
+    ORDER BY b.action_time DESC, b.log_id DESC;
 END $$
 
 -- ===================== 계정 =====================
@@ -228,14 +234,14 @@ END $$
 
 -- ===================== 트리거 =====================
 
--- 수정 전 성적을 이력에 남김
+-- 수정 전 성적을 이력에 남김 (@changed_by = 프로시저가 넣어 준 login_id)
 DROP TRIGGER IF EXISTS student_data_after_update $$
 CREATE TRIGGER student_data_after_update
 AFTER UPDATE ON student_data
 FOR EACH ROW
 BEGIN
-    INSERT INTO student_data_backup(bunho, name, kor, mat, eng, total, average, grade, schoolcode, action_log)
-    VALUES (OLD.bunho, OLD.name, OLD.kor, OLD.mat, OLD.eng, OLD.total, OLD.average, OLD.grade, OLD.schoolcode, 'UPDATE');
+    INSERT INTO student_data_backup(bunho, name, kor, mat, eng, total, average, grade, schoolcode, action_log, changed_by)
+    VALUES (OLD.bunho, OLD.name, OLD.kor, OLD.mat, OLD.eng, OLD.total, OLD.average, OLD.grade, OLD.schoolcode, 'UPDATE', @changed_by);
 END $$
 
 -- 삭제된 성적을 이력에 남기고 학교 학생 수 감소
@@ -244,17 +250,19 @@ CREATE TRIGGER student_data_after_delete
 AFTER DELETE ON student_data
 FOR EACH ROW
 BEGIN
-    INSERT INTO student_data_backup(bunho, name, kor, mat, eng, total, average, grade, schoolcode, action_log)
-    VALUES (OLD.bunho, OLD.name, OLD.kor, OLD.mat, OLD.eng, OLD.total, OLD.average, OLD.grade, OLD.schoolcode, 'DELETE');
+    INSERT INTO student_data_backup(bunho, name, kor, mat, eng, total, average, grade, schoolcode, action_log, changed_by)
+    VALUES (OLD.bunho, OLD.name, OLD.kor, OLD.mat, OLD.eng, OLD.total, OLD.average, OLD.grade, OLD.schoolcode, 'DELETE', @changed_by);
     UPDATE school_data SET studentcount = studentcount - 1 WHERE schoolcode = OLD.schoolcode;
 END $$
 
--- 학생이 등록되면 학교 학생 수 증가
+-- 학생이 등록되면 등록한 값을 이력에 남기고 학교 학생 수 증가
 DROP TRIGGER IF EXISTS student_data_after_insert $$
 CREATE TRIGGER student_data_after_insert
 AFTER INSERT ON student_data
 FOR EACH ROW
 BEGIN
+    INSERT INTO student_data_backup(bunho, name, kor, mat, eng, total, average, grade, schoolcode, action_log, changed_by)
+    VALUES (NEW.bunho, NEW.name, NEW.kor, NEW.mat, NEW.eng, NEW.total, NEW.average, NEW.grade, NEW.schoolcode, 'INSERT', @changed_by);
     UPDATE school_data SET studentcount = studentcount + 1 WHERE schoolcode = NEW.schoolcode;
 END $$
 

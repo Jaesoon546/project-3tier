@@ -34,7 +34,7 @@ CREATE TABLE student_data (
     FOREIGN KEY (schoolcode) REFERENCES school_data(schoolcode)
 );
 
--- 성적 수정·삭제 이력 (트리거가 기록)
+-- 학생 등록·성적 수정·삭제 이력 (트리거가 기록)
 CREATE TABLE student_data_backup (
     log_id      INT          NOT NULL AUTO_INCREMENT PRIMARY KEY,
     bunho       INT          NOT NULL,
@@ -46,8 +46,9 @@ CREATE TABLE student_data_backup (
     average     DECIMAL(5,2),
     grade       CHAR(1),
     schoolcode  VARCHAR(10),
-    action_log  VARCHAR(10)  NOT NULL,                 -- 'UPDATE' 또는 'DELETE'
-    action_time DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
+    action_log  VARCHAR(10)  NOT NULL,                 -- 'INSERT', 'UPDATE', 'DELETE'
+    action_time DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    changed_by  VARCHAR(30)                            -- 바꾼 사람의 login_id (DB에서 직접 바꾸면 NULL)
 );
 
 -- 로그인 계정 (관리자·교사·학생)
