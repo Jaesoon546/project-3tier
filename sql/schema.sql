@@ -16,6 +16,7 @@ CREATE TABLE school_data (
     schoolcode   VARCHAR(10)  NOT NULL PRIMARY KEY,   -- 예: DJ001
     schoolname   VARCHAR(50)  NOT NULL,
     address      VARCHAR(100),
+    homepage     VARCHAR(200),                        -- 학교 홈페이지 (사진을 누르면 이동)
     studentcount INT          DEFAULT 0
 );
 

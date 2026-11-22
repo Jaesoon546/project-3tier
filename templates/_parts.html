@@ -1,0 +1,31 @@
+{# 여러 화면에서 같이 쓰는 조각 — 사용: {% import "_parts.html" as parts with context %} #}
+
+{# 학교 사진 배너 (사진: 김상민) — 사진을 누르면 학교 홈페이지가 새 탭으로 열림 #}
+{% macro school_banner(school) %}
+{% set img = school_image(school.schoolcode) if school else None %}
+{% if img %}
+<figure class="school-banner mb-3">
+    {% if school.homepage %}
+    <a href="{{ school.homepage }}" target="_blank" rel="noopener noreferrer" title="{{ school.schoolname }} 홈페이지 열기">
+        <img src="{{ img }}" alt="{{ school.schoolname }} 사진 (홈페이지로 이동)">
+    </a>
+    <figcaption class="text-secondary small mt-1">사진을 누르면 {{ school.schoolname }} 홈페이지가 새 탭으로 열립니다 ↗</figcaption>
+    {% else %}
+    <img src="{{ img }}" alt="{{ school.schoolname }} 사진">
+    {% endif %}
+</figure>
+{% endif %}
+{% endmacro %}
+
+{# 캐릭터 yuni (그림: 김상민) — 꾸밈용이라 화면 읽기 프로그램은 건너뜀 #}
+{% macro yuni(n, height=120) %}
+<img src="{{ url_for('static', filename='images/yuni/yuni_' ~ n ~ '.png') }}" alt="" aria-hidden="true" height="{{ height }}" class="yuni">
+{% endmacro %}
+
+{# 표가 비었을 때 #}
+{% macro empty_row(colspan, message) %}
+<tr><td colspan="{{ colspan }}" class="py-4 text-secondary">
+    {{ yuni(2, 96) }}
+    <div class="mt-2">{{ message }}</div>
+</td></tr>
+{% endmacro %}

@@ -1,9 +1,12 @@
 {% extends "base.html" %}
+{% import "_parts.html" as parts with context %}
 {% block title %}내 성적조회{% endblock title %}
 {% block content %}
 <!-- 디자인: 김상민 my_grade.html (한 줄 표) -->
+<div class="text-center">{{ parts.yuni(4, 110) }}</div>
 <h2 class="page_title">내 성적조회</h2>
 {% if sungjuk %}
+{{ parts.school_banner(school) }}
 <p class="text-center text-secondary">{{ school.schoolname if school }} · {{ sungjuk.name }}</p>
 <table class="table table-hover align-middle text-center">
     <thead class="table-light text-center">
@@ -23,6 +26,6 @@
 </table>
 <p class="text-secondary small text-center">석차는 같은 학교 안에서 평균이 높은 순서입니다.</p>
 {% else %}
-<p class="text-center">성적 정보가 없습니다. 선생님께 문의하세요.</p>
+<div class="text-center text-secondary py-4">{{ parts.yuni(2, 96) }}<div class="mt-2">성적 정보가 없습니다. 선생님께 문의하세요.</div></div>
 {% endif %}
 {% endblock content %}

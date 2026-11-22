@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% import "_parts.html" as parts with context %}
 {% block title %}{{ school.schoolname }} 과목별 성적조회{% endblock title %}
 
 {% block style %}
@@ -12,6 +13,7 @@
 
 {% block content %}
 <h2 class="page_title">{{ school.schoolname }} 과목별 성적조회</h2>
+{{ parts.school_banner(school) }}
 
 <div class="d-flex flex-wrap gap-2 mb-3">
     {% if school_list %}
@@ -49,7 +51,7 @@
             <td>{{ s.total }}</td> <td>{{ s.average }}</td> <td>{{ s.grade }}</td> <td>{{ s.ranks }}</td>
         </tr>
         {% else %}
-        <tr><td colspan="9">등록된 학생이 없습니다.</td></tr>
+        {{ parts.empty_row(9, '등록된 학생이 없습니다.') }}
         {% endfor %}
     </tbody>
 </table>

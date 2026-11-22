@@ -14,7 +14,11 @@ function drawRows(rows) {
         var $tr = $("<tr>");
         // .text()로 넣어야 이름에 HTML이 섞여 있어도 안전함
         $.each([s.ranks, s.bunho, s.name, s.kor, s.eng, s.mat, s.total, s.average, s.grade], function (j, v) {
-            $tr.append($("<td>").text(v));
+            if (j === 2) {   // 이름 → 그 학생의 변경이력 링크
+                $tr.append($("<td>").append($("<a>").attr("href", "/history/student/" + encodeURIComponent(s.bunho)).text(v)));
+            } else {
+                $tr.append($("<td>").text(v));
+            }
         });
         if (withButtons) {
             $tr.append($("<td>").append(makeForm("/sungjuk_update", s.bunho, csrf, "성적 수정", "btn-outline-primary")));

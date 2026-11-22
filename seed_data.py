@@ -38,7 +38,7 @@ def main():
     # 1) 학교
     schools = read_csv('schools.csv')
     for row in schools:
-        check(school.insertSchool(row['schoolcode'], row['schoolname'], row['address']),
+        check(school.insertSchool(row['schoolcode'], row['schoolname'], row['address'], row.get('homepage') or None),
               f"학교 {row['schoolname']}")
 
     # 2) 학생 — 웹의 학생 등록과 같은 검사·계산을 거침

@@ -10,12 +10,27 @@ from flask_wtf.csrf import CSRFProtect
 from dao import school, student, user
 from service.grade import student_from_form
 from service.account import account_from_form, check_password, ROLES
+from service.school import check_homepage
 
 app = Flask(__name__)
 # 세션 암호화 키 — 실제로는 환경변수로 넣으세요 (export SECRET_KEY=...)
 # os.urandom을 쓰면 서버가 재시작될 때마다 로그인이 풀려서 개발용 기본값을 둠
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-only-change-me')
 CSRFProtect(app)   # 모든 POST 폼에 csrf_token 필요
+
+# 학교 사진: static/images/schools/<학교코드>.jpg 가 있으면 화면 위에 보여줌 (사진: 김상민)
+SCHOOL_IMAGE_DIR = os.path.join(app.static_folder, 'images', 'schools')
+
+
+@app.context_processor
+def template_helpers():
+    """모든 템플릿에서 school_image(코드)를 쓸 수 있게 함 — 사진이 없으면 None"""
+    def school_image(schoolcode):
+        if schoolcode and os.path.isfile(os.path.join(SCHOOL_IMAGE_DIR, f'{schoolcode}.jpg')):
+            return url_for('static', filename=f'images/schools/{schoolcode}.jpg')
+        return None
+    return dict(school_image=school_image)
+
 
 RESULT_MESSAGE = {1: '완료되었습니다.', 2: '대상을 찾을 수 없습니다.', -1: '에러가 발생했습니다.'}
 
@@ -105,7 +120,11 @@ def school_insert():
         if not code or not name:
             flash('학교코드와 학교명을 입력하세요.')
             return render_template('school_insert.html', form=request.form)
-        result = school.insertSchool(code, name, address)
+        homepage, error = check_homepage(request.form.get('homepage'))
+        if error:
+            flash(error)
+            return render_template('school_insert.html', form=request.form)
+        result = school.insertSchool(code, name, address, homepage)
         if result != 1:
             flash('등록 실패 (학교코드 중복 등)')
             return render_template('school_insert.html', form=request.form)
@@ -325,6 +344,20 @@ def history(schoolcode):
     school_list = school.getSchoolList() if session['user']['role'] == 'admin' else []
     return render_template('history.html', school=info, school_list=school_list,
                            object_list=student.getHistory(schoolcode))
+
+
+@app.route('/history/student/<int:bunho>')
+@login_required('admin', 'teacher')
+def student_history(bunho):
+    """학생 한 명의 등록·수정·삭제 이력 (아이디어: 박지희) — 성적표·변경이력에서 이름을 누르면 이동"""
+    rows = student.getStudentHistory(bunho)
+    current = student.getStudent(bunho)   # 삭제된 학생이면 None (이력은 남아 있음)
+    if not rows and current is None:
+        abort(404)
+    code = current['schoolcode'] if current else rows[0]['schoolcode']
+    check_school(code)                    # 교사는 자기 학교 학생만
+    return render_template('student_history.html', object_list=rows, sungjuk=current,
+                           school=school.getSchool(code), bunho=bunho)
 
 
 # ===================== 학생 =====================

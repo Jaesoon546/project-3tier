@@ -19,7 +19,7 @@ DELIMITER $$
 DROP PROCEDURE IF EXISTS school_select $$
 CREATE PROCEDURE school_select()
 BEGIN
-    SELECT schoolcode, schoolname, address, studentcount
+    SELECT schoolcode, schoolname, address, homepage, studentcount
     FROM school_data
     ORDER BY schoolname;
 END $$
@@ -27,7 +27,7 @@ END $$
 DROP PROCEDURE IF EXISTS school_select_one $$
 CREATE PROCEDURE school_select_one(IN p_schoolcode VARCHAR(10))
 BEGIN
-    SELECT schoolcode, schoolname, address, studentcount
+    SELECT schoolcode, schoolname, address, homepage, studentcount
     FROM school_data
     WHERE schoolcode = p_schoolcode;
 END $$
@@ -35,11 +35,12 @@ END $$
 DROP PROCEDURE IF EXISTS school_insert $$
 CREATE PROCEDURE school_insert(
     IN p_schoolcode VARCHAR(10), IN p_schoolname VARCHAR(50), IN p_address VARCHAR(100),
+    IN p_homepage VARCHAR(200),
     OUT p_result INT)
 BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION SET p_result = -1;   -- 학교코드 중복 등
-    INSERT INTO school_data(schoolcode, schoolname, address)
-    VALUES (p_schoolcode, p_schoolname, p_address);
+    INSERT INTO school_data(schoolcode, schoolname, address, homepage)
+    VALUES (p_schoolcode, p_schoolname, p_address, p_homepage);
     SET p_result = 1;
 END $$
 
@@ -147,6 +148,20 @@ BEGIN
     FROM student_data_backup b
     LEFT JOIN user_data u ON u.login_id = b.changed_by
     WHERE b.schoolcode = p_schoolcode
+    ORDER BY b.action_time DESC, b.log_id DESC;
+END $$
+
+-- 학생 한 명의 등록·수정·삭제 이력 (아이디어: 박지희 getStudentHistory)
+--   학생이 삭제된 뒤에도 이력은 남아 있으므로 student_data가 아니라 이력 테이블에서 찾음
+DROP PROCEDURE IF EXISTS history_select_student $$
+CREATE PROCEDURE history_select_student(IN p_bunho INT)
+BEGIN
+    SELECT b.log_id, b.bunho, b.name, b.kor, b.eng, b.mat, b.total, b.average, b.grade,
+           b.schoolcode, b.action_log, b.action_time, b.changed_by,
+           COALESCE(u.name, b.changed_by) AS changer_name
+    FROM student_data_backup b
+    LEFT JOIN user_data u ON u.login_id = b.changed_by
+    WHERE b.bunho = p_bunho
     ORDER BY b.action_time DESC, b.log_id DESC;
 END $$
 
