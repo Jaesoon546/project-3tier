@@ -82,6 +82,7 @@ def login():
 def logout():
     """POST만 받음 — 다른 사이트의 링크나 이미지로 몰래 로그아웃시키지 못하게 (CSRF 토큰 검사, 아이디어: 박지희)"""
     session.clear()
+    flash('로그아웃되었습니다.')   # 로그아웃 완료 안내 (계획: 김상민) — 첫 화면에 표시
     return redirect(url_for('home'))
 
 
@@ -241,7 +242,7 @@ def sungjuk_insert():
         if error:
             flash(error)
             return render_template('sungjuk_form.html', mode='insert', sungjuk=request.form)
-        result = student.insertStudent(new_student, schoolcode)
+        result = student.insertStudent(new_student, schoolcode, session['user']['login_id'])
         flash(RESULT_MESSAGE.get(result, '알 수 없음'))
         return redirect(url_for('sungjuk_call', schoolcode=schoolcode))
     return render_template('sungjuk_form.html', mode='insert', sungjuk={})
@@ -269,7 +270,7 @@ def sungjuk_update():
     if error:
         flash(error)
         return render_template('sungjuk_form.html', mode='update', sungjuk=request.form)
-    result = student.updateStudent(bunho, new_student)
+    result = student.updateStudent(bunho, new_student, session['user']['login_id'])
     flash(RESULT_MESSAGE.get(result, '알 수 없음'))
     return redirect(url_for('sungjuk_update'))
 
@@ -287,7 +288,7 @@ def sungjuk_delete():
         flash(RESULT_MESSAGE[2])
         return redirect(url_for('home'))
     check_school(target['schoolcode'])
-    result = student.deleteStudent(bunho)
+    result = student.deleteStudent(bunho, session['user']['login_id'])
     flash(RESULT_MESSAGE.get(result, '알 수 없음'))
     return redirect(url_for('sungjuk_delete'))
 
@@ -303,6 +304,17 @@ def stats(schoolcode):
                            object_list=student.getStats(schoolcode))
 
 
+@app.route('/history')
+@login_required('admin', 'teacher')
+def history_first():
+    """메뉴 '변경이력조회' → 교사는 자기 학교, 관리자는 첫 학교의 이력으로 이동 (메뉴 배치: 김상민 v4)"""
+    code = default_schoolcode()
+    if code is None:
+        flash('등록된 학교가 없습니다.')
+        return redirect(url_for('home'))
+    return redirect(url_for('history', schoolcode=code))
+
+
 @app.route('/history/<schoolcode>')
 @login_required('admin', 'teacher')
 def history(schoolcode):
@@ -310,7 +322,8 @@ def history(schoolcode):
     info = school.getSchool(schoolcode)
     if info is None:   # 없는 학교 코드 (아이디어: 박지희)
         abort(404)
-    return render_template('history.html', school=info,
+    school_list = school.getSchoolList() if session['user']['role'] == 'admin' else []
+    return render_template('history.html', school=info, school_list=school_list,
                            object_list=student.getHistory(schoolcode))
 
 
@@ -320,7 +333,8 @@ def history(schoolcode):
 @login_required('student')
 def my_sungjuk():
     me = student.getStudent(session['user']['bunho'])
-    return render_template('my_sungjuk.html', sungjuk=me)
+    info = school.getSchool(me['schoolcode']) if me else None
+    return render_template('my_sungjuk.html', sungjuk=me, school=info)
 
 
 # ===================== JSON (AJAX) =====================

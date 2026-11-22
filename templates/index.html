@@ -24,6 +24,13 @@
 {% block body %}
 <section class="main_background">
     <div class="container">
+        {% for message in get_flashed_messages() %}
+        <!-- 로그아웃 완료 등 안내 (첫 화면은 body 블록을 바꿔서 base의 알림 자리가 없음) -->
+        <div class="alert alert-info alert-dismissible fade show w-auto d-inline-block mb-3">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div><br>
+        {% endfor %}
         <div class="main_text">
             <h2>미래융합교육원과 함께하는</h2>
             <h1 class="fw-bold">NIKE 성적관리시스템</h1>

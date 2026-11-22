@@ -1,21 +1,28 @@
 {% extends "base.html" %}
-{% block title %}내 성적{% endblock title %}
+{% block title %}내 성적조회{% endblock title %}
 {% block content %}
-<h2 class="page_title">내 성적</h2>
+<!-- 디자인: 김상민 my_grade.html (한 줄 표) -->
+<h2 class="page_title">내 성적조회</h2>
 {% if sungjuk %}
-<table class="table w-auto">
+<p class="text-center text-secondary">{{ school.schoolname if school }} · {{ sungjuk.name }}</p>
+<table class="table table-hover align-middle text-center">
+    <thead class="table-light text-center">
+        <tr>
+            <th>번호</th><th>이름</th><th>국어</th><th>영어</th><th>수학</th>
+            <th>총점</th><th>평균</th><th>학점</th><th>석차</th><th>학교코드</th>
+        </tr>
+    </thead>
     <tbody>
-        <tr><th>이름</th><td>{{ sungjuk.name }}</td></tr>
-        <tr><th>국어</th><td>{{ sungjuk.kor }}</td></tr>
-        <tr><th>영어</th><td>{{ sungjuk.eng }}</td></tr>
-        <tr><th>수학</th><td>{{ sungjuk.mat }}</td></tr>
-        <tr><th>총점</th><td>{{ sungjuk.total }}</td></tr>
-        <tr><th>평균</th><td>{{ sungjuk.average }}</td></tr>
-        <tr><th>학점</th><td>{{ sungjuk.grade }}</td></tr>
-        <tr><th>학교 등수</th><td>{{ sungjuk.ranks }}</td></tr>
+        <tr>
+            <td>{{ sungjuk.bunho }}</td> <td>{{ sungjuk.name }}</td>
+            <td>{{ sungjuk.kor }}</td> <td>{{ sungjuk.eng }}</td> <td>{{ sungjuk.mat }}</td>
+            <td>{{ sungjuk.total }}</td> <td>{{ sungjuk.average }}</td> <td>{{ sungjuk.grade }}</td>
+            <td>{{ sungjuk.ranks }}</td> <td>{{ sungjuk.schoolcode }}</td>
+        </tr>
     </tbody>
 </table>
+<p class="text-secondary small text-center">석차는 같은 학교 안에서 평균이 높은 순서입니다.</p>
 {% else %}
-<p>성적 정보가 없습니다. 선생님께 문의하세요.</p>
+<p class="text-center">성적 정보가 없습니다. 선생님께 문의하세요.</p>
 {% endif %}
 {% endblock content %}

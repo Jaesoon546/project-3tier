@@ -14,22 +14,22 @@ def searchStudent(schoolcode, name):
     return select_proc("student_search", (schoolcode, name))
 
 
-def insertStudent(student, schoolcode):
-    """student : service.grade.Student"""
+def insertStudent(student, schoolcode, changed_by=None):
+    """student : service.grade.Student, changed_by : 등록한 사람의 login_id (변경이력의 '변경자')"""
     return result_proc("student_insert", (
         student.name, student.kor, student.mat, student.eng,
         student.total(), round(student.avg(), 2), student.grade(),
-        schoolcode, 0))
+        schoolcode, changed_by, 0))
 
 
-def updateStudent(bunho, student):
+def updateStudent(bunho, student, changed_by=None):
     return result_proc("student_update", (
         bunho, student.name, student.kor, student.mat, student.eng,
-        student.total(), round(student.avg(), 2), student.grade(), 0))
+        student.total(), round(student.avg(), 2), student.grade(), changed_by, 0))
 
 
-def deleteStudent(bunho):
-    return result_proc("student_delete", (bunho, 0))
+def deleteStudent(bunho, changed_by=None):
+    return result_proc("student_delete", (bunho, changed_by, 0))
 
 
 def getStats(schoolcode):
@@ -38,5 +38,5 @@ def getStats(schoolcode):
 
 
 def getHistory(schoolcode):
-    """성적 수정·삭제 이력"""
+    """학생 등록·성적 수정·삭제 이력 (변경자 이름 포함)"""
     return select_proc("history_select", (schoolcode,))

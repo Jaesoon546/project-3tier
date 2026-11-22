@@ -32,6 +32,7 @@ pip install -r requirements.txt
 # 2) DB 만들기 — HeidiSQL에서 sql/ 파일을 아래 순서대로 실행
 #    처음 만들 때: schema.sql → procedures.sql
 #    이미 만든 DB의 데이터를 비울 때: reset_data.sql
+#    이미 만든 DB에 구조 변경이 생겼을 때: sql/migrations/ 의 새 파일을 한 번 실행 → procedures.sql 다시 실행
 #    (schema.sql은 테이블을 지우고 다시 만들므로 다시 실행하지 않음)
 
 # 3) 접속 정보는 환경변수로 (코드·문서에 비밀번호를 적지 않음)
@@ -78,7 +79,7 @@ python flaskserver.py      # http://127.0.0.1:5000
 | `/sungjuk_delete` | GET·POST | 교사 | GET: 삭제할 학생 목록 / POST: 삭제 |
 | `/subject_rank`, `/subject_rank/<schoolcode>` | GET | 관리자·교사 | 과목별 성적조회 (과목 제목 클릭 정렬, 이름 검색) |
 | `/stats/<schoolcode>` | GET | 관리자·교사 | 과목별 합계·평균·최고·최저 |
-| `/history/<schoolcode>` | GET | 관리자·교사 | 수정·삭제 이력 |
+| `/history`, `/history/<schoolcode>` | GET | 관리자·교사 | 변경이력조회: 등록·수정·삭제 이력과 변경자 (메뉴는 기본 학교로 이동, 관리자는 학교 선택) |
 | `/my_sungjuk` | GET | 학생 | 내 성적 |
 | `/_search?schoolcode=&name=` | GET (JSON) | 관리자·교사 | 이름 검색 (AJAX) |
 
