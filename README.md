@@ -30,7 +30,9 @@ school_sungjuk/
 pip install -r requirements.txt
 
 # 2) DB 만들기 — HeidiSQL에서 sql/ 파일을 아래 순서대로 실행
-#    schema.sql → procedures.sql → school_data.sql → student_data.sql → user_data.sql
+#    처음 만들 때: schema.sql → procedures.sql → school_data.sql → student_data.sql → user_data.sql
+#    이미 만든 DB에 데이터만 새로 넣을 때: reset_data.sql → school_data.sql → student_data.sql → user_data.sql
+#    (schema.sql은 테이블을 지우고 다시 만들므로 다시 실행하지 않음)
 
 # 3) 접속 정보는 환경변수로 (코드·문서에 비밀번호를 적지 않음)
 export DB_HOST=<DB 서버 IP>
@@ -46,9 +48,11 @@ python flaskserver.py      # http://127.0.0.1:5000
 
 | 아이디 | 역할 | 볼 수 있는 것 |
 |---|---|---|
-| admin | 관리자 | 학교 목록·등록, 계정 발급·관리, 모든 학교 성적표·통계·이력 (조회만) |
-| teacher1 / teacher2 / teacher3 | 교사 | 자기 학교 성적표, 학생 등록·수정·삭제, 통계, 이력, 검색 |
-| student1 / student6 / student11 | 학생 | 내 성적 |
+| admin01 | 관리자 | 학교 목록·등록, 계정 발급·관리, 모든 학교 성적표·통계·이력 (조회만) |
+| tea_dj001 / tea_dj002 / tea_dj003 | 교사 (대전고 / 충남고 / 유성고) | 자기 학교 성적표, 학생 등록·수정·삭제, 통계, 이력, 검색 |
+| stu_01 ~ stu_30 | 학생 (01~10 대전고, 11~20 충남고, 21~30 유성고) | 내 성적 |
+
+데이터·아이디 체계: DB 담당 김현준. 학교 3개 × 학생 10명.
 
 ## 라우트
 

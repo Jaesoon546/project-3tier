@@ -1,18 +1,39 @@
--- 학생·성적 데이터 (가상) — 총점·평균·학점은 service/grade.py와 같은 규칙으로 계산한 값
+-- 학생·성적 데이터 (DB 담당: 김현준) — 학교마다 10명, bunho 1~30
+-- 총점·평균·학점은 service/grade.py와 같은 규칙으로 계산해서 넣은 값 (등수는 student_rank 뷰가 계산)
+-- bunho를 직접 적어서 user_data.sql의 학생 계정과 번호가 항상 맞게 함
 USE school_sungjuk;
 
-INSERT INTO student_data(name, kor, mat, eng, total, average, grade, schoolcode) VALUES ('김민준', 75, 64, 80, 219, 73.0, 'C', 'DJ00000001');
-INSERT INTO student_data(name, kor, mat, eng, total, average, grade, schoolcode) VALUES ('이서연', 96, 58, 59, 213, 71.0, 'C', 'DJ00000001');
-INSERT INTO student_data(name, kor, mat, eng, total, average, grade, schoolcode) VALUES ('박도윤', 89, 61, 78, 228, 76.0, 'C', 'DJ00000001');
-INSERT INTO student_data(name, kor, mat, eng, total, average, grade, schoolcode) VALUES ('최지우', 92, 58, 87, 237, 79.0, 'C', 'DJ00000001');
-INSERT INTO student_data(name, kor, mat, eng, total, average, grade, schoolcode) VALUES ('정하준', 68, 57, 60, 185, 61.67, 'D', 'DJ00000001');
-INSERT INTO student_data(name, kor, mat, eng, total, average, grade, schoolcode) VALUES ('강서윤', 82, 81, 59, 222, 74.0, 'C', 'DJ00000002');
-INSERT INTO student_data(name, kor, mat, eng, total, average, grade, schoolcode) VALUES ('조예준', 70, 60, 90, 220, 73.33, 'C', 'DJ00000002');
-INSERT INTO student_data(name, kor, mat, eng, total, average, grade, schoolcode) VALUES ('윤지민', 82, 58, 91, 231, 77.0, 'C', 'DJ00000002');
-INSERT INTO student_data(name, kor, mat, eng, total, average, grade, schoolcode) VALUES ('장시우', 62, 69, 95, 226, 75.33, 'C', 'DJ00000002');
-INSERT INTO student_data(name, kor, mat, eng, total, average, grade, schoolcode) VALUES ('임수아', 95, 92, 58, 245, 81.67, 'B', 'DJ00000002');
-INSERT INTO student_data(name, kor, mat, eng, total, average, grade, schoolcode) VALUES ('한주원', 91, 92, 80, 263, 87.67, 'B', 'SE00000001');
-INSERT INTO student_data(name, kor, mat, eng, total, average, grade, schoolcode) VALUES ('오하은', 58, 69, 57, 184, 61.33, 'D', 'SE00000001');
-INSERT INTO student_data(name, kor, mat, eng, total, average, grade, schoolcode) VALUES ('서지호', 90, 63, 73, 226, 75.33, 'C', 'SE00000001');
-INSERT INTO student_data(name, kor, mat, eng, total, average, grade, schoolcode) VALUES ('신채원', 81, 64, 89, 234, 78.0, 'C', 'SE00000001');
-INSERT INTO student_data(name, kor, mat, eng, total, average, grade, schoolcode) VALUES ('권도현', 62, 91, 74, 227, 75.67, 'C', 'SE00000001');
+INSERT INTO student_data(bunho, name, kor, eng, mat, total, average, grade, schoolcode) VALUES
+-- DJ001
+(1, '홍만우', 100, 90, 80, 270, 90.00, 'A', 'DJ001'),
+(2, '김종수', 90, 100, 80, 270, 90.00, 'A', 'DJ001'),
+(3, '곽신석', 90, 80, 100, 270, 90.00, 'A', 'DJ001'),
+(4, '장한별', 80, 90, 100, 270, 90.00, 'A', 'DJ001'),
+(5, '박서준', 85, 95, 90, 270, 90.00, 'A', 'DJ001'),
+(6, '이도윤', 75, 80, 85, 240, 80.00, 'B', 'DJ001'),
+(7, '최민준', 95, 85, 90, 270, 90.00, 'A', 'DJ001'),
+(8, '정하윤', 88, 92, 78, 258, 86.00, 'B', 'DJ001'),
+(9, '윤지호', 70, 85, 95, 250, 83.33, 'B', 'DJ001'),
+(10, '강서연', 98, 90, 95, 283, 94.33, 'A', 'DJ001'),
+-- DJ002
+(11, '김현준', 100, 90, 80, 270, 90.00, 'A', 'DJ002'),
+(12, '박재순', 90, 100, 80, 270, 90.00, 'A', 'DJ002'),
+(13, '김상민', 90, 80, 100, 270, 90.00, 'A', 'DJ002'),
+(14, '박지희', 80, 90, 100, 270, 90.00, 'A', 'DJ002'),
+(15, '이민수', 100, 85, 90, 275, 91.67, 'A', 'DJ002'),
+(16, '최서연', 85, 95, 90, 270, 90.00, 'A', 'DJ002'),
+(17, '정우진', 90, 85, 95, 270, 90.00, 'A', 'DJ002'),
+(18, '한지민', 95, 90, 85, 270, 90.00, 'A', 'DJ002'),
+(19, '오세훈', 80, 100, 90, 270, 90.00, 'A', 'DJ002'),
+(20, '윤서준', 90, 95, 100, 285, 95.00, 'A', 'DJ002'),
+-- DJ003
+(21, '이희도', 100, 90, 80, 270, 90.00, 'A', 'DJ003'),
+(22, '윤유미', 90, 100, 80, 270, 90.00, 'A', 'DJ003'),
+(23, '서창수', 80, 90, 100, 270, 90.00, 'A', 'DJ003'),
+(24, '정다솔', 90, 80, 100, 270, 90.00, 'A', 'DJ003'),
+(25, '김채현', 80, 100, 90, 270, 90.00, 'A', 'DJ003'),
+(26, '박민준', 100, 85, 90, 275, 91.67, 'A', 'DJ003'),
+(27, '최유진', 85, 95, 90, 270, 90.00, 'A', 'DJ003'),
+(28, '강현우', 90, 85, 95, 270, 90.00, 'A', 'DJ003'),
+(29, '한서연', 95, 90, 85, 270, 90.00, 'A', 'DJ003'),
+(30, '오지훈', 80, 100, 90, 270, 90.00, 'A', 'DJ003');
