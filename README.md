@@ -55,7 +55,8 @@ python flaskserver.py      # http://127.0.0.1:5000
 | 라우트 | 방식 | 권한 | 내용 |
 |---|---|---|---|
 | `/` | GET | 모두 | 로그인 전: 첫 화면(메인 배경) / 로그인 후: 역할별 첫 화면으로 이동 |
-| `/login`, `/logout` | GET·POST | 모두 | 로그인 (아이디 저장하기) |
+| `/login` | GET·POST | 모두 | 로그인 (아이디 저장하기, 빈칸 검사, 로그인 시 세션 새로 시작) |
+| `/logout` | POST | 모두 | 로그아웃 (메뉴의 버튼 폼, csrf_token 포함) |
 | `/school_list` | GET | 관리자 | 학교목록조회 |
 | `/school_insert` | GET·POST | 관리자 | 학교 등록 |
 | `/user_list` | GET | 관리자 | 계정 목록 + 계정 발급 폼 |

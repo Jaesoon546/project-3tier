@@ -61,8 +61,16 @@ def home():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        found = user.login(request.form.get('login_id', ''), request.form.get('password', ''))
+        login_id = request.form.get('login_id', '').strip()
+        password = request.form.get('password', '')
+        # 빈칸이면 DB까지 가지 않음 (아이디어: 박지희)
+        if not login_id or not password:
+            flash('아이디와 비밀번호를 입력하세요.')
+            return render_template('login.html')
+        found = user.login(login_id, password)
         if found:
+            # 로그인 전 세션을 비우고 새로 저장 — 이전 사용자의 값이 남지 않게 (아이디어: 박지희)
+            session.clear()
             session['user'] = found
             flash(f"{found['name']}님 환영합니다.")
             return redirect(url_for('home'))
@@ -70,8 +78,9 @@ def login():
     return render_template('login.html')
 
 
-@app.route('/logout')
+@app.route('/logout', methods=['POST'])
 def logout():
+    """POST만 받음 — 다른 사이트의 링크나 이미지로 몰래 로그아웃시키지 못하게 (CSRF 토큰 검사, 아이디어: 박지희)"""
     session.clear()
     return redirect(url_for('home'))
 
@@ -287,7 +296,10 @@ def sungjuk_delete():
 @login_required('admin', 'teacher')
 def stats(schoolcode):
     check_school(schoolcode)
-    return render_template('stats.html', school=school.getSchool(schoolcode),
+    info = school.getSchool(schoolcode)
+    if info is None:   # 없는 학교 코드 (아이디어: 박지희)
+        abort(404)
+    return render_template('stats.html', school=info,
                            object_list=student.getStats(schoolcode))
 
 
@@ -295,7 +307,10 @@ def stats(schoolcode):
 @login_required('admin', 'teacher')
 def history(schoolcode):
     check_school(schoolcode)
-    return render_template('history.html', school=school.getSchool(schoolcode),
+    info = school.getSchool(schoolcode)
+    if info is None:   # 없는 학교 코드 (아이디어: 박지희)
+        abort(404)
+    return render_template('history.html', school=info,
                            object_list=student.getHistory(schoolcode))
 
 
@@ -314,9 +329,14 @@ def my_sungjuk():
 @login_required('admin', 'teacher')
 def search():
     """이름 검색 — AJAX 실습(/_add_numbers)처럼 JSON으로 돌려줌"""
-    schoolcode = request.args.get('schoolcode', '')
-    name = request.args.get('name', '')
+    schoolcode = request.args.get('schoolcode', '').strip()
+    name = request.args.get('name', '').strip()
+    # 학교 코드 확인 — 화면이 아닌 JS가 받으므로 JSON 에러로 돌려줌 (아이디어: 박지희)
+    if not schoolcode:
+        return jsonify(error='학교 코드가 필요합니다.'), 400
     check_school(schoolcode)
+    if school.getSchool(schoolcode) is None:
+        return jsonify(error='존재하지 않는 학교입니다.'), 404
     rows = student.searchStudent(schoolcode, name)
     for row in rows:   # Decimal은 JSON으로 못 바꿔서 float로 변환
         row['average'] = float(row['average'])

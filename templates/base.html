@@ -86,7 +86,13 @@
 
                     {% if me %}
                     <li class="nav-item"><span class="navbar-text px-3">{{ me.name }}</span></li>
-                    <li class="nav-item"><a class="nav-link px-3" href="{{ url_for('logout') }}">로그아웃</a></li>
+                    <li class="nav-item">
+                        <!-- 로그아웃은 POST + csrf_token (링크로 몰래 로그아웃되지 않게) -->
+                        <form method="post" action="{{ url_for('logout') }}" class="d-inline">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="nav-link px-3 border-0 bg-transparent">로그아웃</button>
+                        </form>
+                    </li>
                     {% else %}
                     <li class="nav-item"><a class="nav-link px-3" href="{{ url_for('login') }}">로그인</a></li>
                     {% endif %}
