@@ -3,7 +3,7 @@
 {% block content %}
 <h2 class="page_title">학교 등록</h2>
 
-<!-- 디자인: 김상민 school_insert.html — 표 한 줄에 입력칸을 두는 형태 -->
+<!-- 디자인: 김○민 school_insert.html — 표 한 줄에 입력칸을 두는 형태 -->
 <form id="schoolForm" action="{{ url_for('school_insert') }}" method="post">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <table class="table align-middle text-center">

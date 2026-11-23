@@ -18,7 +18,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-only-change-me')
 CSRFProtect(app)   # 모든 POST 폼에 csrf_token 필요
 
-# 학교 사진: static/images/schools/<학교코드>.jpg 가 있으면 화면 위에 보여줌 (사진: 김상민)
+# 학교 사진: static/images/schools/<학교코드>.jpg 가 있으면 화면 위에 보여줌 (사진: 김○민)
 SCHOOL_IMAGE_DIR = os.path.join(app.static_folder, 'images', 'schools')
 
 
@@ -78,13 +78,13 @@ def login():
     if request.method == 'POST':
         login_id = request.form.get('login_id', '').strip()
         password = request.form.get('password', '')
-        # 빈칸이면 DB까지 가지 않음 (아이디어: 박지희)
+        # 빈칸이면 DB까지 가지 않음 (아이디어: 박○희)
         if not login_id or not password:
             flash('아이디와 비밀번호를 입력하세요.')
             return render_template('login.html')
         found = user.login(login_id, password)
         if found:
-            # 로그인 전 세션을 비우고 새로 저장 — 이전 사용자의 값이 남지 않게 (아이디어: 박지희)
+            # 로그인 전 세션을 비우고 새로 저장 — 이전 사용자의 값이 남지 않게 (아이디어: 박○희)
             session.clear()
             session['user'] = found
             flash(f"{found['name']}님 환영합니다.")
@@ -95,9 +95,9 @@ def login():
 
 @app.route('/logout', methods=['POST'])
 def logout():
-    """POST만 받음 — 다른 사이트의 링크나 이미지로 몰래 로그아웃시키지 못하게 (CSRF 토큰 검사, 아이디어: 박지희)"""
+    """POST만 받음 — 다른 사이트의 링크나 이미지로 몰래 로그아웃시키지 못하게 (CSRF 토큰 검사, 아이디어: 박○희)"""
     session.clear()
-    flash('로그아웃되었습니다.')   # 로그아웃 완료 안내 (계획: 김상민) — 첫 화면에 표시
+    flash('로그아웃되었습니다.')   # 로그아웃 완료 안내 (계획: 김○민) — 첫 화면에 표시
     return redirect(url_for('home'))
 
 
@@ -112,7 +112,7 @@ def school_list():
 @app.route('/school_insert', methods=['GET', 'POST'])
 @login_required('admin')
 def school_insert():
-    """학교 등록 화면 (디자인: 김상민 school_insert.html)"""
+    """학교 등록 화면 (디자인: 김○민 school_insert.html)"""
     if request.method == 'POST':
         code = request.form.get('schoolcode', '').strip()
         name = request.form.get('schoolname', '').strip()
@@ -242,7 +242,7 @@ def subject_rank_first():
 @app.route('/subject_rank/<schoolcode>')
 @login_required('admin', 'teacher')
 def subject_rank(schoolcode):
-    """과목별 성적조회 — 과목 제목을 누르면 그 과목 순으로 정렬, 이름 검색 (디자인: 김상민, 정렬은 브라우저 JS)"""
+    """과목별 성적조회 — 과목 제목을 누르면 그 과목 순으로 정렬, 이름 검색 (디자인: 김○민, 정렬은 브라우저 JS)"""
     check_school(schoolcode)
     info = school.getSchool(schoolcode)
     if info is None:
@@ -270,7 +270,7 @@ def sungjuk_insert():
 @app.route('/sungjuk_update', methods=['GET', 'POST'])
 @login_required('teacher')
 def sungjuk_update():
-    """GET: 수정할 학생 목록 (디자인: 김상민 sungjuk_update.html)
+    """GET: 수정할 학생 목록 (디자인: 김○민 sungjuk_update.html)
     POST: 목록의 [수정] → 폼 보여주기, 폼의 [저장] (mode=save) → DB 수정"""
     if request.method == 'GET':
         return render_template('sungjuk_update.html',
@@ -297,7 +297,7 @@ def sungjuk_update():
 @app.route('/sungjuk_delete', methods=['GET', 'POST'])
 @login_required('teacher')
 def sungjuk_delete():
-    """GET: 삭제할 학생 목록 (디자인: 김상민 sungjuk_delete.html), POST: 삭제"""
+    """GET: 삭제할 학생 목록 (디자인: 김○민 sungjuk_delete.html), POST: 삭제"""
     if request.method == 'GET':
         return render_template('sungjuk_delete.html',
                                object_list=student.getSungjuk(session['user']['schoolcode']))
@@ -317,7 +317,7 @@ def sungjuk_delete():
 def stats(schoolcode):
     check_school(schoolcode)
     info = school.getSchool(schoolcode)
-    if info is None:   # 없는 학교 코드 (아이디어: 박지희)
+    if info is None:   # 없는 학교 코드 (아이디어: 박○희)
         abort(404)
     return render_template('stats.html', school=info,
                            object_list=student.getStats(schoolcode))
@@ -326,7 +326,7 @@ def stats(schoolcode):
 @app.route('/history')
 @login_required('admin', 'teacher')
 def history_first():
-    """메뉴 '변경이력조회' → 교사는 자기 학교, 관리자는 첫 학교의 이력으로 이동 (메뉴 배치: 김상민 v4)"""
+    """메뉴 '변경이력조회' → 교사는 자기 학교, 관리자는 첫 학교의 이력으로 이동 (메뉴 배치: 김○민 v4)"""
     code = default_schoolcode()
     if code is None:
         flash('등록된 학교가 없습니다.')
@@ -339,7 +339,7 @@ def history_first():
 def history(schoolcode):
     check_school(schoolcode)
     info = school.getSchool(schoolcode)
-    if info is None:   # 없는 학교 코드 (아이디어: 박지희)
+    if info is None:   # 없는 학교 코드 (아이디어: 박○희)
         abort(404)
     school_list = school.getSchoolList() if session['user']['role'] == 'admin' else []
     return render_template('history.html', school=info, school_list=school_list,
@@ -349,7 +349,7 @@ def history(schoolcode):
 @app.route('/history/student/<int:bunho>')
 @login_required('admin', 'teacher')
 def student_history(bunho):
-    """학생 한 명의 등록·수정·삭제 이력 (아이디어: 박지희) — 성적표·변경이력에서 이름을 누르면 이동"""
+    """학생 한 명의 등록·수정·삭제 이력 (아이디어: 박○희) — 성적표·변경이력에서 이름을 누르면 이동"""
     rows = student.getStudentHistory(bunho)
     current = student.getStudent(bunho)   # 삭제된 학생이면 None (이력은 남아 있음)
     if not rows and current is None:
@@ -378,7 +378,7 @@ def search():
     """이름 검색 — AJAX 실습(/_add_numbers)처럼 JSON으로 돌려줌"""
     schoolcode = request.args.get('schoolcode', '').strip()
     name = request.args.get('name', '').strip()
-    # 학교 코드 확인 — 화면이 아닌 JS가 받으므로 JSON 에러로 돌려줌 (아이디어: 박지희)
+    # 학교 코드 확인 — 화면이 아닌 JS가 받으므로 JSON 에러로 돌려줌 (아이디어: 박○희)
     if not schoolcode:
         return jsonify(error='학교 코드가 필요합니다.'), 400
     check_school(schoolcode)

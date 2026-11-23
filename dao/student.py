@@ -43,5 +43,5 @@ def getHistory(schoolcode):
 
 
 def getStudentHistory(bunho):
-    """학생 한 명의 등록·수정·삭제 이력 (아이디어: 박지희) — 삭제된 학생도 조회됨"""
+    """학생 한 명의 등록·수정·삭제 이력 (아이디어: 박○희) — 삭제된 학생도 조회됨"""
     return select_proc("history_select_student", (bunho,))

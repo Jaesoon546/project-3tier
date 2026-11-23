@@ -7,7 +7,7 @@ service/grade.py가 계산해서 프로시저로 저장합니다. (계산값을 
     python seed_data.py
 
 이미 데이터가 있으면 HeidiSQL에서 sql/reset_data.sql을 먼저 실행하세요.
-데이터 원본: data/schools.csv, data/students.csv (DB 담당: 김현준)
+데이터 원본: data/schools.csv, data/students.csv (DB 담당: 김○준)
 """
 import csv
 import os

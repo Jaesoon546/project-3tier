@@ -1,6 +1,6 @@
 {# 여러 화면에서 같이 쓰는 조각 — 사용: {% import "_parts.html" as parts with context %} #}
 
-{# 학교 사진 배너 (사진: 김상민) — 사진을 누르면 학교 홈페이지가 새 탭으로 열림 #}
+{# 학교 사진 배너 (사진: 김○민) — 사진을 누르면 학교 홈페이지가 새 탭으로 열림 #}
 {% macro school_banner(school) %}
 {% set img = school_image(school.schoolcode) if school else None %}
 {% if img %}
@@ -17,7 +17,7 @@
 {% endif %}
 {% endmacro %}
 
-{# 캐릭터 yuni (그림: 김상민) — 꾸밈용이라 화면 읽기 프로그램은 건너뜀 #}
+{# 캐릭터 yuni (그림: 김○민) — 꾸밈용이라 화면 읽기 프로그램은 건너뜀 #}
 {% macro yuni(n, height=120) %}
 <img src="{{ url_for('static', filename='images/yuni/yuni_' ~ n ~ '.png') }}" alt="" aria-hidden="true" height="{{ height }}" class="yuni">
 {% endmacro %}

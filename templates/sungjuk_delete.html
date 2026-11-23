@@ -4,7 +4,7 @@
 {% block content %}
 <h2 class="page_title">학생 정보 삭제</h2>
 
-<!-- 디자인: 김상민 sungjuk_delete.html — 누른 버튼의 value(bunho)가 전송됨 -->
+<!-- 디자인: 김○민 sungjuk_delete.html — 누른 버튼의 value(bunho)가 전송됨 -->
 <form name="deleteForm" id="deleteForm" action="{{ url_for('sungjuk_delete') }}" method="post">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <table class="table table-hover align-middle text-center">

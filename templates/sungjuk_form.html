@@ -4,7 +4,7 @@
 <h2 class="page_title">{{ '학생 성적 수정' if mode == 'update' else '성적 등록' }}</h2>
 
 <!-- 등록·수정 공용 폼: mode에 따라 보낼 주소가 바뀜
-     디자인: 김상민 sungjuk_insert.html — 표 한 줄에 입력칸을 두는 형태 -->
+     디자인: 김○민 sungjuk_insert.html — 표 한 줄에 입력칸을 두는 형태 -->
 <form name="sungjukForm" id="sungjukForm" method="post"
       action="{{ url_for('sungjuk_update') if mode == 'update' else url_for('sungjuk_insert') }}">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">

@@ -3,7 +3,7 @@
 {% set who = sungjuk.name if sungjuk else (object_list[0].name if object_list else bunho ~ '번') %}
 {% block title %}{{ who }} 변경이력{% endblock title %}
 {% block content %}
-<!-- 학생 한 명의 이력 (아이디어: 박지희 getStudentHistory) -->
+<!-- 학생 한 명의 이력 (아이디어: 박○희 getStudentHistory) -->
 <h2 class="page_title">{{ who }} 학생 변경이력</h2>
 <p class="text-center text-secondary">
     {{ school.schoolname if school }} · 번호 {{ bunho }}

@@ -151,7 +151,7 @@ BEGIN
     ORDER BY b.action_time DESC, b.log_id DESC;
 END $$
 
--- 학생 한 명의 등록·수정·삭제 이력 (아이디어: 박지희 getStudentHistory)
+-- 학생 한 명의 등록·수정·삭제 이력 (아이디어: 박○희 getStudentHistory)
 --   학생이 삭제된 뒤에도 이력은 남아 있으므로 student_data가 아니라 이력 테이블에서 찾음
 DROP PROCEDURE IF EXISTS history_select_student $$
 CREATE PROCEDURE history_select_student(IN p_bunho INT)

@@ -6,7 +6,7 @@
 {{ parts.school_banner(school) }}
 
 {% if school_list %}
-<!-- 학교 선택 → 그 학교 성적표로 이동 (디자인: 김상민 school_rank.html의 onchange 방식) -->
+<!-- 학교 선택 → 그 학교 성적표로 이동 (디자인: 김○민 school_rank.html의 onchange 방식) -->
 <select id="school_select" class="form-select w-auto mb-2" onchange="location.href=this.value">
     <optgroup label="학교명">
         {% for s in school_list %}
