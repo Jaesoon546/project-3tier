@@ -37,7 +37,7 @@ Python · SQL · HTML · JavaScript · Flask를 한 프로젝트에 모두 쓰�
 | 기간 | 2026.11 — 기획 발표 → 구현 → 결과발표(11/23) |
 | 목표 | 수업 내용 정리 · 3tier 개념과 다루는 방법 익히기 · 다음 프로젝트의 기반 만들기 |
 | 출발점 | 수업 Flask 실습(`flaskserver.py` + `dao/` + `templates/`) 구조와, 앞서 만든 성적 프로그램의 `Student` 클래스 |
-| 개발 환경 | WSL2 Ubuntu 24.04, Python 3, MySQL 8.0, HeidiSQL |
+| 개발 환경 | Flask: 내 PC의 WSL2 Ubuntu 24.04 · DB: GCP 가상머신의 MySQL 8.0 (PuTTY로 서버 관리, HeidiSQL로 SQL 실행) |
 
 ### 팀 구성
 
@@ -72,52 +72,72 @@ Python · SQL · HTML · JavaScript · Flask를 한 프로젝트에 모두 쓰�
 
 ## 3. 처음 실행해 보기 (따라 하기)
 
-> 처음 해 보는 사람도 따라 할 수 있도록, **새 컴퓨터(WSL2 Ubuntu 24.04)에 MySQL까지 설치하는 순서**로 적었습니다.
-> 수업용 GCP 서버의 MySQL을 쓰는 경우에는 3-2를 건너뛰고, 3-3·3-4의 SQL 파일을 HeidiSQL로 실행하면 됩니다.
+이 프로젝트는 **서버가 두 대**로 나뉘어 동작합니다.
+
+```
+ [내 PC · Windows]                                   [GCP 가상머신 · Ubuntu]
+  WSL2 Ubuntu 24.04  ── Flask (python flaskserver.py)  ──3306──▶  MySQL 8.0 (school_sungjuk DB)
+  브라우저 http://127.0.0.1:5000                                    ▲
+  HeidiSQL  ─────────────────────── SQL 실행 ─────────────────────────┤
+  PuTTY     ─────────────────────── 서버 관리 (SSH) ──────────────────┘
+```
+
+| 하는 일 | 어디서 | 도구 |
+|---|---|---|
+| MySQL 설치·설정 | GCP 가상머신 | PuTTY (SSH 접속) |
+| DB·테이블·프로시저 만들기 | GCP MySQL | HeidiSQL |
+| Flask 서버 실행 | 내 PC의 WSL2 | Ubuntu 터미널 |
 
 ### 3-1. 준비물
 
-- Windows라면 **WSL2 + Ubuntu 24.04** (Mac·Linux는 터미널 그대로)
-- **Python 3.10 이상**, **MySQL 8.0 이상** (등수에 `RANK()` 함수를 써서 5.7에서는 동작하지 않습니다)
+- **GCP 가상머신**(Ubuntu)에 **MySQL 8.0 이상** — 등수에 `RANK()` 함수를 써서 5.7에서는 동작하지 않습니다
+- 내 PC에 **PuTTY**, **HeidiSQL**, **WSL2 + Ubuntu 24.04**
+
+### 3-2. GCP 가상머신의 MySQL을 외부에서 접속할 수 있게 하기 (PuTTY)
+
+> 수업에서 이미 HeidiSQL로 GCP MySQL에 접속하고 있다면 이 단계는 끝난 상태이니 3-3으로 넘어가세요.
+
+PuTTY로 가상머신에 접속한 뒤:
 
 ```bash
-sudo apt update
-sudo apt install -y python3 python3-venv python3-pip git mysql-server
+sudo apt update && sudo apt install -y mysql-server     # 설치되어 있지 않을 때만
+mysql --version                                         # 8.0 이상인지 확인
+
+# 외부 접속 허용: bind-address = 127.0.0.1  →  0.0.0.0
+sudo nano /etc/mysql/mysql.conf.d/mysqld.cnf
+sudo systemctl restart mysql
 ```
 
-### 3-2. 코드 받기
+GCP 콘솔의 **VPC 네트워크 → 방화벽**에서 TCP **3306** 포트를 허용하는 규칙이 있어야 합니다.
+(가능하면 소스 IP를 내 PC의 IP로 제한하세요.)
+
+### 3-3. DB 만들기 (HeidiSQL)
+
+HeidiSQL로 GCP MySQL(가상머신의 **외부 IP**, 포트 3306)에 접속한 뒤 **파일 → SQL 파일 실행**으로 아래 순서대로 실행합니다.
+
+1. `sql/schema.sql` — DB(`school_sungjuk`)와 테이블 생성
+2. `sql/procedures.sql` — 뷰·프로시저·트리거 생성 (`DELIMITER`를 쓰므로 **파일 전체를 한 번에** 실행)
+
+### 3-4. Flask가 쓸 DB 계정 만들기 (HeidiSQL 쿼리 창)
+
+Flask는 내 PC(WSL2)에서 GCP로 접속하므로 외부 접속용 계정이 필요합니다. `비밀번호`는 원하는 값으로 바꾸세요.
+
+```sql
+CREATE USER 'sungjuk'@'%' IDENTIFIED BY '비밀번호';
+GRANT ALL PRIVILEGES ON school_sungjuk.* TO 'sungjuk'@'%';
+FLUSH PRIVILEGES;
+```
+
+> 수업에서 쓰는 기존 계정으로 접속해도 동작은 합니다. 다만 root 비밀번호를 여러 곳에 적게 되므로 프로젝트 전용 계정을 권장합니다.
+
+### 3-5. 코드 받기와 파이썬 준비 (WSL2 Ubuntu 터미널)
 
 ```bash
+sudo apt update && sudo apt install -y python3 python3-venv python3-pip git
+
 git clone https://github.com/Jaesoon546/project-3tier.git
 cd project-3tier
-```
 
-### 3-3. DB 만들기 (테이블 → 프로시저 순서)
-
-Ubuntu에 설치한 MySQL은 `sudo mysql`로 root 접속이 됩니다.
-
-```bash
-sudo service mysql start              # WSL에서는 MySQL을 직접 켜야 합니다
-sudo mysql < sql/schema.sql           # DB(school_sungjuk)와 테이블 생성
-sudo mysql < sql/procedures.sql       # 뷰·프로시저·트리거 생성
-```
-
-> HeidiSQL을 쓸 때도 순서는 같습니다: `schema.sql` → `procedures.sql`.
-> `procedures.sql`은 `DELIMITER`를 쓰므로 **파일 전체를 한 번에 실행**하세요.
-
-### 3-4. 웹 서버가 쓸 DB 계정 만들기
-
-Flask는 비밀번호로 접속해야 하므로 전용 계정을 하나 만듭니다. (`비밀번호`는 원하는 값으로 바꾸세요.)
-
-```bash
-sudo mysql -e "CREATE USER 'sungjuk'@'localhost' IDENTIFIED BY '비밀번호';
-               GRANT ALL PRIVILEGES ON school_sungjuk.* TO 'sungjuk'@'localhost';
-               FLUSH PRIVILEGES;"
-```
-
-### 3-5. 파이썬 가상환경과 패키지
-
-```bash
 python3 -m venv .venv
 source .venv/bin/activate             # 새 터미널을 열 때마다 다시 실행
 pip install -r requirements.txt
@@ -130,43 +150,45 @@ pip install -r requirements.txt
 
 ```bash
 cp .env.example .env
-nano .env                             # DB_USER=sungjuk, DB_PASSWORD=3-4에서 정한 비밀번호
+nano .env       # DB_HOST=GCP 가상머신의 외부 IP, DB_USER=sungjuk, DB_PASSWORD=3-4에서 정한 비밀번호
 source .env
 ```
 
-### 3-7. 테스트 데이터 넣기 (처음 한 번)
+### 3-7. 테스트 데이터 넣기 (처음 한 번, WSL2)
 
 ```bash
 python seed_data.py
 # 완료: 학교 3개, 학생 30명, 계정 34개 (비밀번호 test1234)
 ```
 
-`data/*.csv`에는 점수만 있고, 총점·평균·학점은 웹에서 등록할 때와 똑같이 `service/grade.py`가 계산해서 넣습니다.
+`data/*.csv`에는 점수만 있고, 총점·평균·학점은 웹에서 등록할 때와 똑같이 `service/grade.py`가 계산해서 GCP의 DB에 넣습니다.
+이 단계가 성공하면 WSL2 → GCP MySQL 연결이 제대로 된 것입니다.
 
-### 3-8. 서버 실행
+### 3-8. 서버 실행 (WSL2)
 
 ```bash
 python flaskserver.py
 ```
 
-브라우저에서 **http://127.0.0.1:5000** 을 열고 아래 [테스트 계정](#4-테스트-계정)으로 로그인하세요.
+Windows 브라우저에서 **http://127.0.0.1:5000** 을 열고 아래 [테스트 계정](#4-테스트-계정)으로 로그인하세요.
 서버를 끌 때는 터미널에서 `Ctrl + C`.
 
 ### 다음에 다시 실행할 때
 
+GCP 가상머신이 켜져 있는지 확인한 뒤 WSL2에서:
+
 ```bash
 cd project-3tier
-sudo service mysql start
 source .venv/bin/activate && source .env
 python flaskserver.py
 ```
 
+> GCP 가상머신을 껐다 켜면 **외부 IP가 바뀔 수 있습니다.** 접속이 안 되면 GCP 콘솔에서 IP를 확인해 `.env`의 `DB_HOST`와 HeidiSQL 접속 정보를 고쳐 주세요. (고정 IP로 예약하면 바뀌지 않습니다.)
+
 ### 데이터를 처음 상태로 되돌리고 싶을 때
 
-```bash
-sudo mysql < sql/reset_data.sql       # 데이터만 비움 (테이블·프로시저는 그대로)
-python seed_data.py
-```
+1. HeidiSQL에서 `sql/reset_data.sql` 실행 — 데이터만 비움 (테이블·프로시저는 그대로)
+2. WSL2에서 `python seed_data.py`
 
 > ⚠️ `schema.sql`은 테이블을 **지우고 다시 만들기** 때문에 다시 실행하면 데이터가 모두 사라집니다.
 > 프로시저만 바뀌었을 때는 `procedures.sql`만 다시 실행하면 되고, 이 파일은 데이터를 지우지 않습니다.
@@ -279,13 +301,14 @@ project-3tier/
 
 | 증상 | 해결 |
 |---|---|
-| `Can't connect to MySQL server` | `sudo service mysql start`로 MySQL을 켰는지, `.env`의 `DB_HOST`가 맞는지 확인 |
-| `Access denied for user` | `source .env`를 했는지, 3-4에서 만든 계정·비밀번호와 `.env`가 같은지 확인 |
-| `Unknown database 'school_sungjuk'` | `sql/schema.sql`을 먼저 실행 |
+| `Can't connect to MySQL server` | GCP 가상머신이 켜져 있는지, `.env`의 `DB_HOST`가 지금 외부 IP와 같은지, GCP 방화벽 3306 허용·`bind-address = 0.0.0.0`인지 확인 |
+| `Host ... is not allowed to connect` | DB 계정이 `'sungjuk'@'localhost'`로 만들어짐 → 3-4처럼 `'sungjuk'@'%'`로 만들기 |
+| `Access denied for user` | WSL2에서 `source .env`를 했는지, 3-4에서 만든 계정·비밀번호와 `.env`가 같은지 확인 |
+| `Unknown database 'school_sungjuk'` | HeidiSQL에서 `sql/schema.sql`을 먼저 실행 |
 | `PROCEDURE ... does not exist` | `sql/procedures.sql`을 실행 (HeidiSQL에서는 파일 전체를 한 번에) |
 | `ModuleNotFoundError: flask` 등 | `source .venv/bin/activate` 후 `pip install -r requirements.txt` |
 | `seed_data.py`가 "이미 학교가 있습니다"로 멈춤 | `sql/reset_data.sql` 실행 후 다시 |
-| `RANK` 관련 문법 오류 | MySQL 버전 확인 (`mysql --version`) — 8.0 이상 필요 |
+| `RANK` 관련 문법 오류 | PuTTY에서 `mysql --version`으로 GCP MySQL 버전 확인 — 8.0 이상 필요 |
 
 ---
 
@@ -298,7 +321,7 @@ project-3tier/
 
 **한계와 다음 프로젝트에서 개선할 점**
 - 팀원들이 Git을 쓰지 못해, 각자 코드를 노션으로 받아 통합 담당이 뼈대에 이어 붙이는 방식으로 진행 → 다음 프로젝트에서는 팀원 모두 브랜치·PR로 협업
-- 서버를 직접 실행해야 볼 수 있음 (배포는 하지 않음)
+- Flask는 각자 PC(WSL2)에서 실행해야 볼 수 있음 — 웹 서버는 배포하지 않고 DB만 GCP에 둠
 - 과목이 국어·영어·수학 3개로 고정되어 있어 과목 추가에는 테이블 구조 변경이 필요
 
 > 처음 만든 뼈대(단계별로 살을 붙인 과정을 보여 주기 위한 버전)는 별도 비공개 저장소에 보관했습니다.
